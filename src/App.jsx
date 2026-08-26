@@ -1,92 +1,138 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import Sidebar from './components/Sidebar.jsx';
-import MapView from './components/MapView.jsx';
-import { fetchNodes, fetchEdges, fetchAmbulances, fetchBlindSpots, fetchCoverageCurve } from './api.js';
-
-const CURVE_THRESHOLDS = [5, 10, 15, 20, 25, 30, 35, 40];
+import { useCallback, useEffect, useState } from 'react';
+import QueuePanel from './components/queuePanel.jsx';
+import ResultCard from './components/resultCard.jsx';
+import TriageForm from './components/triageForm.jsx';
+import { evaluateTriage, fetchActiveQueue, resolveAssessment } from './triageApi.js';
 
 export default function App() {
-  const [nodes, setNodes] = useState([]);
-  const [edges, setEdges] = useState([]);
-  const [ambulances, setAmbulances] = useState([]);
-  const [blindSpots, setBlindSpots] = useState([]);
-  const [coverageCurve, setCoverageCurve] = useState([]);
-  const [threshold, setThreshold] = useState(10.0);
-  const [connected, setConnected] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState(null);
-  const [flyToTarget, setFlyToTarget] = useState(null);
+  const [activeQueue, setActiveQueue] = useState([]);
+  const [latestResult, setLatestResult] = useState(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [resolvingId, setResolvingId] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [lastUpdated, setLastUpdated] = useState('');
 
-  const loadGraph = useCallback(async () => {
-    const [n, e, a] = await Promise.all([fetchNodes(), fetchEdges(), fetchAmbulances()]);
-    setNodes(n);
-    setEdges(e);
-    setAmbulances(a);
-    return n;
-  }, []);
+  const loadQueue = useCallback(async ({ showLoader = true } = {}) => {
+    if (showLoader) {
+      setIsLoading(true);
+    }
 
-  const loadBlindSpots = useCallback(async (currentThreshold) => {
-    const spots = await fetchBlindSpots(currentThreshold);
-    setBlindSpots(spots);
-  }, []);
-
-  const loadCoverageCurve = useCallback(async () => {
-    const curve = await fetchCoverageCurve(CURVE_THRESHOLDS);
-    setCoverageCurve(curve);
-  }, []);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const n = await loadGraph();
-        await Promise.all([loadBlindSpots(threshold), loadCoverageCurve()]);
-        setConnected(true);
-        setLastUpdated(new Date().toLocaleTimeString());
-      } catch (err) {
-        console.error(err);
-        setConnected(false);
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    try {
+      const queueData = await fetchActiveQueue();
+      setActiveQueue(queueData);
+      setIsConnected(true);
+      setErrorMessage('');
+      setLastUpdated(
+        new Intl.DateTimeFormat('en', {
+          hour: '2-digit',
+          minute: '2-digit'
+        }).format(new Date())
+      );
+    } catch (error) {
+      setIsConnected(false);
+      setErrorMessage(error.message);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   useEffect(() => {
-    const handle = setTimeout(async () => {
-      try {
-        await loadBlindSpots(threshold);
-        setLastUpdated(new Date().toLocaleTimeString());
-      } catch (err) {
-        console.error(err);
-        setConnected(false);
-      }
-    }, 300);
-    return () => clearTimeout(handle);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [threshold]);
+    loadQueue();
 
-  const availableAmbulances = ambulances.filter((a) => a.status === 'AVAILABLE').length;
+    const refreshInterval = window.setInterval(() => {
+      loadQueue({ showLoader: false });
+    }, 15000);
+
+    return () => window.clearInterval(refreshInterval);
+  }, [loadQueue]);
+
+  async function handleEvaluate(assessmentData) {
+    setIsSubmitting(true);
+    setErrorMessage('');
+
+    try {
+      const result = await evaluateTriage(assessmentData);
+      setLatestResult(result);
+      await loadQueue({ showLoader: false });
+    } catch (error) {
+      setErrorMessage(error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function handleResolve(assessment) {
+    const shouldResolve = window.confirm(
+      `Mark queue position #${assessment.queuePosition} as resolved?`
+    );
+
+    if (!shouldResolve) {
+      return;
+    }
+
+    setResolvingId(assessment.id);
+    setErrorMessage('');
+
+    try {
+      await resolveAssessment(assessment.id);
+      await loadQueue({ showLoader: false });
+    } catch (error) {
+      setErrorMessage(error.message);
+    } finally {
+      setResolvingId(null);
+    }
+  }
 
   return (
-    <div className="app">
-      <Sidebar
-        connected={connected}
-        threshold={threshold}
-        onThresholdChange={setThreshold}
-        nodeCount={nodes.length}
-        edgeCount={edges.length}
-        availableAmbulances={availableAmbulances}
-        blindSpots={blindSpots}
-        onSelectBlindSpot={setFlyToTarget}
-        coverageCurve={coverageCurve}
-      />
-      <MapView
-        nodes={nodes}
-        edges={edges}
-        ambulances={ambulances}
-        blindSpots={blindSpots}
-        threshold={threshold}
-        lastUpdated={lastUpdated}
-        flyToTarget={flyToTarget}
-      />
-    </div>
+    <main className="appShell">
+      <header className="topBar">
+        <div className="brandBlock">
+          <span className="brandMark" aria-hidden="true">+</span>
+          <div>
+            <span className="eyebrow">Ambulance dispatch system · Task 04</span>
+            <h1>Triage command</h1>
+          </div>
+        </div>
+        <div className="connectionStatus">
+          <span className={isConnected ? 'statusDot isOnline' : 'statusDot'} />
+          <div>
+            <strong>{isConnected ? 'Decision engine online' : 'Backend unavailable'}</strong>
+            <span>Manchester triage priority service</span>
+          </div>
+        </div>
+      </header>
+
+      {errorMessage && (
+        <div className="errorBanner" role="alert">
+          <span aria-hidden="true">!</span>
+          <p>{errorMessage}</p>
+          <button className="retryButton" type="button" onClick={() => loadQueue()}>
+            Retry connection
+          </button>
+          <button type="button" onClick={() => setErrorMessage('')} aria-label="Dismiss error">
+            ×
+          </button>
+        </div>
+      )}
+
+      <div className="dashboardGrid">
+        <section className="assessmentPanel">
+          <TriageForm isSubmitting={isSubmitting} onSubmit={handleEvaluate} />
+          <ResultCard result={latestResult} />
+        </section>
+
+        <QueuePanel
+          activeQueue={activeQueue}
+          isLoading={isLoading}
+          resolvingId={resolvingId}
+          lastUpdated={lastUpdated}
+          isConnected={isConnected}
+          onRefresh={() => loadQueue()}
+          onResolve={handleResolve}
+        />
+      </div>
+    </main>
   );
 }
