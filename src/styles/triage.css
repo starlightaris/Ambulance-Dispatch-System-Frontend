@@ -1,0 +1,7 @@
+/* Triage module styles. Colours/fonts come from styles/variables.css
+   (loaded globally) — reference var(--text), var(--accent-info), etc.
+   Replace this accent rule once real triage screens exist. */
+
+.triage-page {
+  border-top: 3px solid var(--accent-danger);
+}

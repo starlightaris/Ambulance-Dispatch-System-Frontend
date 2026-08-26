@@ -1,92 +1,27 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import Sidebar from './components/Sidebar.jsx';
-import MapView from './components/MapView.jsx';
-import { fetchNodes, fetchEdges, fetchAmbulances, fetchBlindSpots, fetchCoverageCurve } from './api.js';
-
-const CURVE_THRESHOLDS = [5, 10, 15, 20, 25, 30, 35, 40];
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import NavBar from './components/common/NavBar.jsx';
+import NetworkDetectionPage from './pages/NetworkDetectionPage.jsx';
+import TriagePage from './pages/TriagePage.jsx';
+import SchedulingPage from './pages/SchedulingPage.jsx';
+import ResourceAllocationPage from './pages/ResourceAllocationPage.jsx';
+import RoutingPage from './pages/RoutingPage.jsx';
 
 export default function App() {
-  const [nodes, setNodes] = useState([]);
-  const [edges, setEdges] = useState([]);
-  const [ambulances, setAmbulances] = useState([]);
-  const [blindSpots, setBlindSpots] = useState([]);
-  const [coverageCurve, setCoverageCurve] = useState([]);
-  const [threshold, setThreshold] = useState(10.0);
-  const [connected, setConnected] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState(null);
-  const [flyToTarget, setFlyToTarget] = useState(null);
-
-  const loadGraph = useCallback(async () => {
-    const [n, e, a] = await Promise.all([fetchNodes(), fetchEdges(), fetchAmbulances()]);
-    setNodes(n);
-    setEdges(e);
-    setAmbulances(a);
-    return n;
-  }, []);
-
-  const loadBlindSpots = useCallback(async (currentThreshold) => {
-    const spots = await fetchBlindSpots(currentThreshold);
-    setBlindSpots(spots);
-  }, []);
-
-  const loadCoverageCurve = useCallback(async () => {
-    const curve = await fetchCoverageCurve(CURVE_THRESHOLDS);
-    setCoverageCurve(curve);
-  }, []);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const n = await loadGraph();
-        await Promise.all([loadBlindSpots(threshold), loadCoverageCurve()]);
-        setConnected(true);
-        setLastUpdated(new Date().toLocaleTimeString());
-      } catch (err) {
-        console.error(err);
-        setConnected(false);
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    const handle = setTimeout(async () => {
-      try {
-        await loadBlindSpots(threshold);
-        setLastUpdated(new Date().toLocaleTimeString());
-      } catch (err) {
-        console.error(err);
-        setConnected(false);
-      }
-    }, 300);
-    return () => clearTimeout(handle);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [threshold]);
-
-  const availableAmbulances = ambulances.filter((a) => a.status === 'AVAILABLE').length;
-
   return (
-    <div className="app">
-      <Sidebar
-        connected={connected}
-        threshold={threshold}
-        onThresholdChange={setThreshold}
-        nodeCount={nodes.length}
-        edgeCount={edges.length}
-        availableAmbulances={availableAmbulances}
-        blindSpots={blindSpots}
-        onSelectBlindSpot={setFlyToTarget}
-        coverageCurve={coverageCurve}
-      />
-      <MapView
-        nodes={nodes}
-        edges={edges}
-        ambulances={ambulances}
-        blindSpots={blindSpots}
-        threshold={threshold}
-        lastUpdated={lastUpdated}
-        flyToTarget={flyToTarget}
-      />
-    </div>
+    <BrowserRouter>
+      <div className="app-shell">
+        <NavBar />
+        <div className="app-content">
+          <Routes>
+            <Route path="/" element={<NetworkDetectionPage />} />
+            <Route path="/triage" element={<TriagePage />} />
+            <Route path="/scheduling" element={<SchedulingPage />} />
+            <Route path="/resource-allocation" element={<ResourceAllocationPage />} />
+            <Route path="/routing" element={<RoutingPage />} />
+          </Routes>
+        </div>
+      </div>
+    </BrowserRouter>
   );
 }
