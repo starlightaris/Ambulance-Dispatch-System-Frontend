@@ -1,0 +1,7 @@
+/* Scheduling / shift-optimization module styles. Colours/fonts come from
+   styles/variables.css (loaded globally). Replace this accent rule once
+   real scheduling screens exist. */
+
+.scheduling-page {
+  border-top: 3px solid var(--accent-info);
+}

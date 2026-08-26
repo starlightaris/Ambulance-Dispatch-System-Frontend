@@ -1,0 +1,7 @@
+/* Resource Allocation module styles. Colours/fonts come from
+   styles/variables.css (loaded globally). Replace this accent rule once
+   real resource-allocation screens exist. */
+
+.resource-allocation-page {
+  border-top: 3px solid var(--accent-ok);
+}
