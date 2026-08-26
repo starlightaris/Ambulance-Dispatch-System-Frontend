@@ -1,11 +1,5 @@
 ```text
-|   .gitignore
-|   index.html
-|   package-lock.json
-|   package.json
-|   vite.config.js
-|   
-└──src
+src
     |   App.jsx
     |   main.jsx
     |   
@@ -24,26 +18,10 @@
     |   |       StatusBadge.jsx
     |   |       
     |   ├──network-detection
-    |   |       BlindSpotList.jsx
-    |   |       CoverageCurveChart.jsx
-    |   |       CoverageGauge.jsx
-    |   |       Legend.jsx
-    |   |       MapView.jsx
-    |   |       Sidebar.jsx
-    |   |       StatsGrid.jsx
-    |   |       ThresholdSlider.jsx
-    |   |       
     |   ├──resource-allocation
-    |   |       .gitkeep
-    |   |       
     |   ├──routing
-    |   |       .gitkeep
-    |   |       
     |   ├──scheduling
-    |   |       .gitkeep
-    |   |       
     |   └──triage
-    |           .gitkeep
     |           
     ├──pages
     |       NetworkDetectionPage.jsx
