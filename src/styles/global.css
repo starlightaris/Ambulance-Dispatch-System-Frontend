@@ -78,6 +78,27 @@ body {
   color: var(--accent-info);
 }
 
+.top-nav-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.top-nav-group + .top-nav-group {
+  margin-left: 8px;
+  padding-left: 20px;
+  border-left: 1px solid var(--line);
+}
+
+.top-nav-group-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
 /* --- Generic module placeholder page --- */
 .page-placeholder {
   height: 100%;
