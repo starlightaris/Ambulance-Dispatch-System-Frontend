@@ -5,15 +5,15 @@ const GROUPS = [
   {
     label: 'Live Dispatch',
     links: [
+      { to: '/', label: 'Network Detection', end: true },
       { to: '/routing', label: 'Routing' },
-      { to: '/resource-allocation', label: 'Resource Allocation' },
       { to: '/triage', label: 'Triage' },
     ],
   },
   {
     label: 'Command & Planning',
     links: [
-      { to: '/', label: 'Network Detection', end: true },
+      { to: '/resource-allocation', label: 'Resource Allocation' },
       { to: '/scheduling', label: 'Scheduling' },
     ],
   },
