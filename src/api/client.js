@@ -1,9 +1,14 @@
-// Relative paths only. In dev, vite.config.js proxies /api to
-// http://localhost:8080. In production (after `npm run build`,
-// served by Spring Boot itself) these resolve on the same origin.
-
 async function handle(res, url) {
-  if (!res.ok) throw new Error(`${url} -> HTTP ${res.status}`);
+  if (!res.ok) {
+    let message = `${url} -> HTTP ${res.status}`;
+    try {
+      const body = await res.json();
+      if (body?.message) message = body.message;
+    } catch {
+      // response wasn't JSON — fall back to the generic message above
+    }
+    throw new Error(message);
+  }
   return res.status === 204 ? null : res.json();
 }
 

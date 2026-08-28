@@ -149,6 +149,31 @@ body {
   padding: 8px 0;
 }
 
+.badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 12px;
+  background: var(--accent-info-dim);
+  color: var(--accent-info);
+}
+.badge-muted { background: var(--panel-hover); color: var(--muted); }
+.badge-ok { background: var(--accent-ok-dim); color: var(--accent-ok); }
+.badge-danger { background: var(--accent-danger-dim); color: var(--accent-danger); }
+
+/* Strips default <fieldset> box styling so it can wrap a form purely to
+   disable all its controls at once (e.g. while a request is in flight)
+   without affecting layout. */
+.fieldset-plain {
+  border: none;
+  margin: 0;
+  padding: 0;
+  display: contents;
+}
+
 /* Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;

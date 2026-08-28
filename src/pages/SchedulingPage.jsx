@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
 import ScheduleTabs from '../components/scheduling/ScheduleTabs.jsx';
+import StaffTab from '../components/scheduling/StaffTab.jsx';
+import ShiftSlotTab from '../components/scheduling/ShiftSlotTab.jsx';
+import RunCompareTab from '../components/scheduling/RunCompareTab.jsx';
+import RosterTab from '../components/scheduling/RosterTab.jsx';
 import '../styles/scheduling.css';
 
 export default function SchedulingPage() {
@@ -9,10 +13,10 @@ export default function SchedulingPage() {
     <div className="schedule-page">
       <ScheduleTabs activeTab={activeTab} onTabChange={setActiveTab} />
       <div className="schedule-tab-content">
-        {activeTab === 'roster' && <div className="empty-note">Roster tab — coming soon.</div>}
-        {activeTab === 'run-compare' && <div className="empty-note">Run & Compare tab — coming soon.</div>}
-        {activeTab === 'staff' && <div className="empty-note">Staff tab — coming soon.</div>}
-        {activeTab === 'shift-template' && <div className="empty-note">Shift Template tab — coming soon.</div>}
+        {activeTab === 'roster' && <RosterTab />}
+        {activeTab === 'run-compare' && <RunCompareTab />}
+        {activeTab === 'staff' && <StaffTab />}
+        {activeTab === 'shift-template' && <ShiftSlotTab />}
       </div>
     </div>
   );
