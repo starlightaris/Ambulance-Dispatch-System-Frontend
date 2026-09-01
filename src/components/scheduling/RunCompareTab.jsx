@@ -29,7 +29,7 @@ function cleanOverride(override) {
 export default function RunCompareTab() {
   const [weekValue, setWeekValue] = useState(currentWeekValue());
   const [mode, setMode] = useState('run');
-  const [algorithm, setAlgorithm] = useState('GENETIC_ALGORITHM');
+  // algorithm state removed — /run only ever executes the Genetic Algorithm now
   const [persist, setPersist] = useState(true);
   const [randomSeed, setRandomSeed] = useState('');
   const [advancedOpen, setAdvancedOpen] = useState(false);
@@ -68,7 +68,8 @@ export default function RunCompareTab() {
     try {
       const request = {
         weekStarting,
-        algorithm: mode === 'run' ? algorithm : undefined,
+        // no `algorithm` field at all — /run defaults to GA server-side,
+        // /compare ignores it and always runs both
         randomSeed: randomSeed === '' ? undefined : parseInt(randomSeed, 10),
         gaParameters: cleanOverride(gaOverride),
         fitnessWeights: cleanOverride(fitnessOverride),
@@ -103,22 +104,16 @@ export default function RunCompareTab() {
             </div>
 
             {mode === 'run' && (
-              <label>
-                Algorithm
-                <select value={algorithm} onChange={(e) => setAlgorithm(e.target.value)}>
-                  <option value="GENETIC_ALGORITHM">Genetic Algorithm</option>
-                  <option value="GREEDY">Greedy</option>
-                </select>
-              </label>
-            )}
-
-            {mode === 'run' && (
               <label className="checkbox-item">
                 <input type="checkbox" checked={persist} onChange={(e) => setPersist(e.target.checked)} />
                 Save this roster
               </label>
             )}
           </div>
+
+          {mode === 'run' && (
+            <EmptyState>Runs the Genetic Algorithm — the module's main algorithm. Switch to Compare to see it against the Greedy baseline.</EmptyState>
+          )}
 
           {weekStarting && existingRosterCount !== null && (
             <EmptyState>
