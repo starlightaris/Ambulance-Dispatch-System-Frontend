@@ -32,7 +32,7 @@ export default function ResourceAllocationPage() {
 
         setEmergencies(pendingResult.items);
         setAmbulances(availableResult.items);
-        setDataSource(pendingResult.source === 'backend' || availableResult.source === 'backend' ? 'backend' : 'demo');
+        setDataSource('backend');
 
         if (pendingResult.items.length > 0) {
           setSelectedId((current) => current ?? pendingResult.items[0].id);
@@ -41,8 +41,8 @@ export default function ResourceAllocationPage() {
         }
       } catch (err) {
         console.error(err);
-        setError('Unable to load emergency queue or ambulance fleet.');
-        setDataSource('demo');
+        setError('Unable to load emergency queue or ambulance fleet from the backend.');
+        setDataSource('backend');
       } finally {
         setLoading(false);
       }

@@ -1,77 +1,3 @@
-const DEMO_EMERGENCIES = [
-  {
-    id: 101,
-    patient: {
-      name: 'Maya Silva',
-      condition: 'Chest pain and shortness of breath',
-      urgencyLevel: 'HIGH'
-    },
-    locationNode: 'Node_16',
-    status: 'RECEIVED',
-    requiredEquipment: ['ECG_MONITOR', 'DEFIBRILLATOR', 'OXYGEN_SUPPLY'],
-    receivedAt: '2026-09-01T08:05:00'
-  },
-  {
-    id: 102,
-    patient: {
-      name: 'Daniel Green',
-      condition: 'Severe respiratory distress',
-      urgencyLevel: 'CRITICAL'
-    },
-    locationNode: 'Node_09',
-    status: 'RECEIVED',
-    requiredEquipment: ['VENTILATOR', 'OXYGEN_SUPPLY', 'ICU_EQUIPMENT'],
-    receivedAt: '2026-09-01T08:12:00'
-  },
-  {
-    id: 103,
-    patient: {
-      name: 'Aisha Khan',
-      condition: 'Post-accident trauma',
-      urgencyLevel: 'MEDIUM'
-    },
-    locationNode: 'Node_21',
-    status: 'RECEIVED',
-    requiredEquipment: ['ECG_MONITOR', 'DEFIBRILLATOR'],
-    receivedAt: '2026-09-01T08:18:00'
-  }
-];
-
-const DEMO_AMBULANCES = [
-  {
-    id: 1,
-    vehicleNumber: 'AMB-104',
-    currentLocationNode: 'Node_12',
-    status: 'AVAILABLE',
-    equipment: ['ECG_MONITOR', 'DEFIBRILLATOR', 'OXYGEN_SUPPLY'],
-    travelMinutes: 11
-  },
-  {
-    id: 2,
-    vehicleNumber: 'AMB-217',
-    currentLocationNode: 'Node_05',
-    status: 'AVAILABLE',
-    equipment: ['VENTILATOR', 'ICU_EQUIPMENT', 'OXYGEN_SUPPLY'],
-    travelMinutes: 16
-  },
-  {
-    id: 3,
-    vehicleNumber: 'AMB-305',
-    currentLocationNode: 'Node_19',
-    status: 'AVAILABLE',
-    equipment: ['ECG_MONITOR', 'DEFIBRILLATOR', 'VENTILATOR'],
-    travelMinutes: 8
-  },
-  {
-    id: 4,
-    vehicleNumber: 'AMB-418',
-    currentLocationNode: 'Node_22',
-    status: 'DISPATCHED',
-    equipment: ['ECG_MONITOR', 'DEFIBRILLATOR', 'OXYGEN_SUPPLY'],
-    travelMinutes: 6
-  }
-];
-
 const normalizeEquipment = (equipment) => {
   if (!Array.isArray(equipment)) {
     return [];
@@ -132,46 +58,24 @@ async function safeFetchJson(url) {
 }
 
 export async function fetchPendingEmergencies() {
-  const candidateUrls = ['/api/dispatch/pending', '/api/dispatch/queue', '/api/v1/triage/queue'];
+  const payload = await safeFetchJson('/api/dispatch/pending');
+  const list = Array.isArray(payload) ? payload : [payload].filter(Boolean);
 
-  for (const url of candidateUrls) {
-    try {
-      const payload = await safeFetchJson(url);
-      const list = Array.isArray(payload) ? payload : [payload];
-      if (list.length > 0) {
-        return { items: list.map(normalizeEmergency), source: 'backend' };
-      }
-    } catch (error) {
-      // Ignore missing endpoints and use the demo fallback below.
-    }
-  }
-
-  return { items: DEMO_EMERGENCIES, source: 'demo' };
+  return {
+    items: list.map(normalizeEmergency),
+    source: 'backend'
+  };
 }
 
 export async function fetchAvailableAmbulances() {
-  const candidateUrls = ['/api/ambulances', '/api/dispatch/ambulances', '/api/network/ambulances'];
-
-  for (const url of candidateUrls) {
-    try {
-      const payload = await safeFetchJson(url);
-      const list = Array.isArray(payload) ? payload : [payload];
-      if (list.length > 0) {
-        return {
-          items: list
-            .map(normalizeAmbulance)
-            .filter((ambulance) => ambulance.status === 'AVAILABLE'),
-          source: 'backend'
-        };
-      }
-    } catch (error) {
-      // Ignore missing endpoints and use the demo fallback below.
-    }
-  }
+  const payload = await safeFetchJson('/api/dispatch/ambulances');
+  const list = Array.isArray(payload) ? payload : [payload].filter(Boolean);
 
   return {
-    items: DEMO_AMBULANCES.filter((ambulance) => ambulance.status === 'AVAILABLE'),
-    source: 'demo'
+    items: list
+      .map(normalizeAmbulance)
+      .filter((ambulance) => ambulance.status === 'AVAILABLE'),
+    source: 'backend'
   };
 }
 
