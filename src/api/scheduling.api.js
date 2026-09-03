@@ -1,8 +1,8 @@
 import { getJson, postJson, putJson, deleteJson } from './client.js';
 
-const STAFF_BASE = '/api/optimization/staff';
-const SHIFT_SLOTS_BASE = '/api/optimization/shift-slots';
-const SCHEDULE_BASE = '/api/optimization/schedule';
+const STAFF_BASE = '/api/v1/optimization/staff';
+const SHIFT_SLOTS_BASE = '/api/v1/optimization/shift-slots';
+const SCHEDULE_BASE = '/api/v1/optimization/schedules';
 
 // --- Staff ---
 export function fetchStaff() {
@@ -42,17 +42,17 @@ export function deleteShiftSlot(id) {
 
 // request: { weekStarting, algorithm?, randomSeed?, gaParameters?, fitnessWeights?, persist? }
 export function runSchedule(request) {
-  return postJson(`${SCHEDULE_BASE}/run`, request);
+  return postJson(`${SCHEDULE_BASE}/runs`, request);
 }
 
 // Same request shape as runSchedule, minus algorithm (always runs both). Never persists.
 export function compareSchedule(request) {
-  return postJson(`${SCHEDULE_BASE}/compare`, request);
+  return postJson(`${SCHEDULE_BASE}/comparisons`, request);
 }
 
 // weekStarting: 'YYYY-MM-DD' string (must be a Monday)
 export function fetchRoster(weekStarting) {
-  return getJson(`${SCHEDULE_BASE}/roster?weekStarting=${weekStarting}`);
+  return getJson(`${SCHEDULE_BASE}?weekStarting=${weekStarting}`);
 }
 
 export function fetchScheduleDefaults() {
