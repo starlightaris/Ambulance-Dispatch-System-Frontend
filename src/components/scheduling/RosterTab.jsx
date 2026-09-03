@@ -58,7 +58,10 @@ export default function RosterTab() {
   return (
     <div className="roster-tab">
       <div className="tab-header">
-        <h2>Roster</h2>
+        <div className="tab-header-text">
+          <h2>Roster</h2>
+          <p className="tab-subtitle">See who's on shift, day by day.</p>
+        </div>
         <label className="week-picker">
           Week
           <input type="week" value={weekValue} onChange={(e) => setWeekValue(e.target.value)} />

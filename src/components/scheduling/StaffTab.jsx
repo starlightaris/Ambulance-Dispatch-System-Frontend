@@ -106,7 +106,10 @@ export default function StaffTab() {
   return (
     <div className="staff-tab">
       <div className="tab-header">
-        <h2>Staff</h2>
+        <div className="tab-header-text">
+          <h2>Staff</h2>
+          <p className="tab-subtitle">Manage who's available to work, their role, and their certifications.</p>
+        </div>
         <button type="button" className="btn-primary" onClick={openCreateForm}>+ Add Staff</button>
       </div>
 
@@ -115,6 +118,8 @@ export default function StaffTab() {
       {formOpen && (
         <form className="entity-form" onSubmit={handleSubmit}>
           <fieldset disabled={saving} className="fieldset-plain">
+            <h3 className="entity-form-title">{editingId ? 'Edit Staff Member' : 'Add Staff Member'}</h3>
+
             <div className="form-row">
               <label>
                 Name

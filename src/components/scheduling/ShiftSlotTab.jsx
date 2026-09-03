@@ -108,7 +108,10 @@ export default function ShiftSlotTab() {
   return (
     <div className="shift-slot-tab">
       <div className="tab-header">
-        <h2>Shift Template</h2>
+        <div className="tab-header-text">
+          <h2>Shift Template</h2>
+          <p className="tab-subtitle">Set the weekly coverage pattern the scheduler fills each week.</p>
+        </div>
         <button type="button" className="btn-primary" onClick={openCreateForm}>+ Add Shift Slot</button>
       </div>
 
@@ -117,6 +120,8 @@ export default function ShiftSlotTab() {
       {formOpen && (
         <form className="entity-form" onSubmit={handleSubmit}>
           <fieldset disabled={saving} className="fieldset-plain">
+            <h3 className="entity-form-title">{editingId ? 'Edit Shift Slot' : 'Add Shift Slot'}</h3>
+
             <div className="form-row">
               <label>
                 Day
