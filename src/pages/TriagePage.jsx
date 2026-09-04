@@ -16,12 +16,19 @@ export default function TriagePage() {
   const [errorMessage, setErrorMessage] = useState('');
   const [lastUpdated, setLastUpdated] = useState('');
 
+  // showLoader doubles as "this call is user-visible" (initial mount, the
+  // Retry button, the Refresh now button all pass the default true) vs. the
+  // silent 15s background poll and the post-evaluate/post-resolve refresh
+  // (both pass false). Only a user-visible call clears errorMessage on
+  // success — otherwise a background poll succeeding a few seconds after an
+  // unrelated evaluate/resolve failure would silently wipe that error off
+  // the screen before the user ever saw it.
   const loadQueue = useCallback(async ({ showLoader = true } = {}) => {
     if (showLoader) setIsLoading(true);
     try {
       setActiveQueue(await fetchActiveQueue());
       setIsConnected(true);
-      setErrorMessage('');
+      if (showLoader) setErrorMessage('');
       setLastUpdated(new Intl.DateTimeFormat('en', { hour: '2-digit', minute: '2-digit' }).format(new Date()));
     } catch (error) {
       setIsConnected(false);
