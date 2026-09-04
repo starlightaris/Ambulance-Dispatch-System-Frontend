@@ -1,0 +1,17 @@
+/* Restored global stylesheet to satisfy imports and preserve existing styles. */
+@import './triage.css';
+
+:root {
+  --brand-color: #55a8ff;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: #f7f9fb;
+  color: #111827;
+}

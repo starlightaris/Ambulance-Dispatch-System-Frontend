@@ -1,0 +1,23 @@
+{
+  "name": "triage-frontend",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --config viteConfig.js",
+    "mock": "node mock-server.js",
+    "build": "vite --config viteConfig.js build",
+    "preview": "vite --config viteConfig.js preview"
+  },
+  "dependencies": {
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.1.0",
+    "body-parser": "^2.3.0",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "vite": "^8.2.2"
+  }
+}
