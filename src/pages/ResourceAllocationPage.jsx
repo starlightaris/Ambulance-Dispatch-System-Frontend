@@ -1,184 +1,96 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import EmergencyList from '../components/resource-allocation/EmergencyList.jsx';
-import AmbulanceMatcher from '../components/resource-allocation/AmbulanceMatcher.jsx';
+import React, { useState } from 'react';
 import ResourceCard from '../components/resource-allocation/ResourceCard.jsx';
-import {
-  fetchPendingEmergencies,
-  fetchAvailableAmbulances,
-  allocateAmbulance
-} from '../api/resourceAllocation.api.js';
+import { dispatchCall } from '../api/resourceAllocation.api.js';
 import '../styles/resource-allocation.css';
 
 export default function ResourceAllocationPage() {
-  const [emergencies, setEmergencies] = useState([]);
-  const [ambulances, setAmbulances] = useState([]);
-  const [selectedId, setSelectedId] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [callId, setCallId] = useState('');
+  const [isDispatching, setIsDispatching] = useState(false);
   const [error, setError] = useState('');
   const [dispatchMessage, setDispatchMessage] = useState('');
-  const [isDispatching, setIsDispatching] = useState(false);
-  const [dataSource, setDataSource] = useState('checking');
 
-  useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      setError('');
-
-     try {
-        const [pendingResult, availableResult] = await Promise.all([
-          fetchPendingEmergencies(),
-          fetchAvailableAmbulances()
-        ]);
-
-        const pendingData = pendingResult || [];
-        const availableData = availableResult || [];
-
-        setEmergencies(pendingData);
-        setAmbulances(availableData);
-        setDataSource('backend');
-
-        if (pendingData.length > 0) {
-          setSelectedId((current) => current ?? pendingData[0].id);
-        } else {
-          setSelectedId(null);
-        }
-      } catch (err) {
-        setEmergencies([]);
-        setAmbulances([]);
-        setSelectedId(null);
-        setError('Resource allocation backend is unavailable. Start the backend and check its database configuration.');
-        setDataSource('unavailable');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadData();
-  }, []);
-
-  const selectedEmergency = useMemo(() => {
-    if (!emergencies.length) {
-      return null;
-    }
-
-    return emergencies.find((emergency) => emergency.id === selectedId) || emergencies[0];
-  }, [emergencies, selectedId]);
-
-  const matchCandidates = useMemo(() => {
-    if (!selectedEmergency) {
-      return [];
-    }
-
-    const required = selectedEmergency.requiredEquipment || [];
-
-    return ambulances
-      .filter((ambulance) => ambulance.status === 'AVAILABLE')
-      .filter((ambulance) => required.every((equipment) => ambulance.equipment.includes(equipment)))
-      .map((ambulance) => {
-        const extraEquipment = Math.max(ambulance.equipment.length - required.length, 0);
-        const travelMinutes = Number(ambulance.travelMinutes ?? 0);
-        const score = travelMinutes + extraEquipment * 5;
-
-        return {
-          ambulance,
-          required,
-          travelMinutes,
-          score,
-          reason: `Covers every required piece of equipment (${required.join(', ')}) and adds ${extraEquipment} extra resource(s). Travel from ${ambulance.currentLocationNode} to ${selectedEmergency.locationNode} is ${travelMinutes} minutes.`
-        };
-      })
-      .sort((left, right) => left.score - right.score);
-  }, [selectedEmergency, ambulances]);
-
-  const handleDispatch = async () => {
-    if (!selectedEmergency) {
-      return;
-    }
-
-    setIsDispatching(true);
+  async function handleDispatch(event) {
+    event.preventDefault();
+    setError('');
     setDispatchMessage('');
+    setIsDispatching(true);
 
     try {
-      const result = await allocateAmbulance(selectedEmergency.id);
-      setDispatchMessage(result);
-      const dispatchedVehicleNumber = result.match(/^Ambulance (.+) dispatched successfully\.$/)?.[1];
-
-      setEmergencies((current) => current.filter((emergency) => emergency.id !== selectedEmergency.id));
-      if (dispatchedVehicleNumber) {
-        setAmbulances((current) =>
-          current.map((ambulance) =>
-            ambulance.vehicleNumber === dispatchedVehicleNumber
-              ? { ...ambulance, status: 'DISPATCHED' }
-              : ambulance
-          )
-        );
-      }
-
-      const remaining = emergencies.filter((emergency) => emergency.id !== selectedEmergency.id);
-      setSelectedId(remaining[0]?.id ?? null);
-    } catch (err) {
-      console.error(err);
-      setDispatchMessage(err.message || 'Dispatch failed.');
+      const result = await dispatchCall(callId);
+      setDispatchMessage(
+        typeof result === 'string' ? result : 'The emergency call was dispatched successfully.'
+      );
+    } catch (requestError) {
+      setError(requestError.message || 'Dispatch failed.');
     } finally {
       setIsDispatching(false);
     }
-  };
-
-  const availableAmbulances = ambulances.filter((ambulance) => ambulance.status === 'AVAILABLE').length;
-  const selectedRequirementCount = selectedEmergency?.requiredEquipment?.length ?? 0;
+  }
 
   return (
-    <div className="page-placeholder resource-allocation-page">
-      <div className="resource-allocation-header">
+    <main className="page-placeholder resource-allocation-page">
+      <header className="resource-allocation-header">
         <div>
           <p className="eyebrow">Intelligent Resource Allocation</p>
-          <h1>Emergency dispatch matching</h1>
+          <h1>Emergency dispatch</h1>
         </div>
         <div className="resource-header-status">
-          <span className={`status-chip ${dataSource === 'backend' ? 'live' : 'demo'}`}>
-            {dataSource === 'backend' ? 'Live backend' : dataSource === 'demo' ? 'Demo fallback' : dataSource === 'unavailable' ? 'Backend unavailable' : 'Checking backend'}
-          </span>
+          <span className="status-chip live">Live backend</span>
         </div>
-      </div>
+      </header>
 
       <div className="resource-stat-grid">
-        <ResourceCard title="Active emergencies" value={emergencies.length} meta="Queued calls" tone="info" />
-        <ResourceCard title="Available ambulances" value={availableAmbulances} meta="Ready to dispatch" tone="ok" />
-        <ResourceCard title="Required equipment" value={selectedRequirementCount} meta={selectedEmergency ? selectedEmergency.locationNode : 'Select a case'} tone="warning" />
+        <ResourceCard title="Dispatch input" value="Call ID" meta="Existing emergency call" tone="info" />
+        <ResourceCard title="Ambulance selection" value="Server" meta="Equipment and route fitness" tone="ok" />
+        <ResourceCard title="API operation" value="POST" meta="Versioned /api/v1 endpoint" tone="warning" />
       </div>
 
-      {error ? <div className="resource-alert error">{error}</div> : null}
-      {dispatchMessage ? <div className="resource-alert success">{dispatchMessage}</div> : null}
+      {error ? <div className="resource-alert error" role="alert">{error}</div> : null}
+      {dispatchMessage ? (
+        <div className="resource-alert success" role="status">{dispatchMessage}</div>
+      ) : null}
 
-      {loading ? (
-        <div className="resource-panel loading-panel">
-          <h3>Loading allocation queue...</h3>
-        </div>
-      ) : (
-        <div className="resource-layout">
-          <div className="resource-column">
-            <EmergencyList
-              emergencies={emergencies}
-              selectedId={selectedEmergency?.id ?? null}
-              onSelect={setSelectedId}
-            />
-          </div>
-
-          <div className="resource-column resource-column-main">
-            <AmbulanceMatcher
-              emergency={selectedEmergency}
-              matches={matchCandidates}
-              onDispatch={handleDispatch}
-              isDispatching={isDispatching}
-              summaryText={
-                matchCandidates[0]
-                  ? `Best fit: ${matchCandidates[0].ambulance.vehicleNumber} matches all equipment and reaches the incident in ${matchCandidates[0].travelMinutes} min.`
-                  : 'No ambulance currently satisfies all required equipment.'
-              }
-            />
+      <section className="resource-panel dispatch-panel">
+        <div className="panel-heading">
+          <div>
+            <h2>Dispatch an emergency call</h2>
+            <p>
+              Enter an existing call ID. The backend checks the call, evaluates available
+              ambulances, and assigns the best eligible vehicle.
+            </p>
           </div>
         </div>
-      )}
-    </div>
+
+        <form className="dispatch-form" onSubmit={handleDispatch}>
+          <label htmlFor="dispatch-call-id">Emergency call ID</label>
+          <div className="dispatch-form-row">
+            <input
+              id="dispatch-call-id"
+              name="callId"
+              type="number"
+              min="1"
+              step="1"
+              inputMode="numeric"
+              value={callId}
+              onChange={(event) => setCallId(event.target.value)}
+              placeholder="e.g. 1"
+              required
+            />
+            <button className="dispatch-button" type="submit" disabled={isDispatching}>
+              {isDispatching ? 'Dispatching...' : 'Dispatch best ambulance'}
+            </button>
+          </div>
+        </form>
+
+        <div className="dispatch-explanation">
+          <h3>How selection works</h3>
+          <p>
+            Selection is performed by the backend scheduler using the call location, required
+            medical equipment, ambulance availability, and route cost. The success message names
+            the vehicle that was actually assigned.
+          </p>
+        </div>
+      </section>
+    </main>
   );
 }
