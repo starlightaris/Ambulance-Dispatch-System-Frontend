@@ -1,5 +1,6 @@
 import React from 'react';
 import EmptyState from '../common/EmptyState.jsx';
+import { TOKEN_COLORS } from '../../styles/tokenColors.js';
 
 export default function CoverageCurveChart({ data }) {
   if (!data || data.length === 0) {
@@ -35,13 +36,13 @@ export default function CoverageCurveChart({ data }) {
                   x2={width - padding.right}
                   y1={yScale(g)}
                   y2={yScale(g)}
-                  stroke="#cbd5e1"
+                  stroke={TOKEN_COLORS.line}
                   strokeWidth="1"
               />
           ))}
 
           <path d={areaD} fill="rgba(79, 70, 229, 0.12)" stroke="none" />
-          <path d={pathD} fill="none" stroke="#4f46e5" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+          <path d={pathD} fill="none" stroke={TOKEN_COLORS.info} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
 
           {data.map((d) => (
               <circle
@@ -49,20 +50,20 @@ export default function CoverageCurveChart({ data }) {
                   cx={xScale(d.thresholdMinutes)}
                   cy={yScale(d.coveragePercentage)}
                   r="2.5"
-                  fill="#4f46e5"
+                  fill={TOKEN_COLORS.info}
               />
           ))}
 
-          <text x={padding.left} y={height - 6} fontSize="9" fill="#64748b" fontFamily="JetBrains Mono, monospace">
+          <text x={padding.left} y={height - 6} fontSize="9" fill={TOKEN_COLORS.muted} fontFamily="JetBrains Mono, monospace">
             {minX}min
           </text>
-          <text x={width - padding.right} y={height - 6} fontSize="9" fill="#64748b" textAnchor="end" fontFamily="JetBrains Mono, monospace">
+          <text x={width - padding.right} y={height - 6} fontSize="9" fill={TOKEN_COLORS.muted} textAnchor="end" fontFamily="JetBrains Mono, monospace">
             {maxX}min
           </text>
-          <text x={padding.left - 6} y={yScale(0) + 3} fontSize="9" fill="#64748b" textAnchor="end" fontFamily="JetBrains Mono, monospace">
+          <text x={padding.left - 6} y={yScale(0) + 3} fontSize="9" fill={TOKEN_COLORS.muted} textAnchor="end" fontFamily="JetBrains Mono, monospace">
             0%
           </text>
-          <text x={padding.left - 6} y={yScale(100) + 3} fontSize="9" fill="#64748b" textAnchor="end" fontFamily="JetBrains Mono, monospace">
+          <text x={padding.left - 6} y={yScale(100) + 3} fontSize="9" fill={TOKEN_COLORS.muted} textAnchor="end" fontFamily="JetBrains Mono, monospace">
             100%
           </text>
         </svg>

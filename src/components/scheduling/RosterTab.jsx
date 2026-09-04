@@ -3,12 +3,9 @@ import { fetchRoster, fetchShiftSlots } from '../../api/scheduling.api.js';
 import { mondayFromWeekValue, currentWeekValue } from './dateUtils.js';
 import EmptyState from '../common/EmptyState.jsx';
 import StatusBadge from '../common/StatusBadge.jsx';
+import { formatLabel } from '../../utils/formatLabel.js';
 
 const DAYS = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
-
-function formatLabel(value) {
-  return value.toLowerCase().split('_').map((w) => w[0].toUpperCase() + w.slice(1)).join(' ');
-}
 
 function slotKey(slot) {
   return `${slot.dayOfWeek}|${slot.startTime}|${slot.endTime}`;

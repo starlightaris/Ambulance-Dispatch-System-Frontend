@@ -61,7 +61,7 @@ body {
 
 .top-nav-link {
   padding: 6px 12px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   font-size: 13px;
   font-weight: 500;
   color: var(--muted);
@@ -124,7 +124,7 @@ body {
   padding: 5px 12px;
   background: var(--panel-2);
   border: 1px solid var(--line);
-  border-radius: 20px;
+  border-radius: var(--radius-pill);
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
   color: var(--muted);
@@ -157,13 +157,54 @@ body {
   letter-spacing: 0.04em;
   text-transform: uppercase;
   padding: 3px 8px;
-  border-radius: 12px;
+  border-radius: var(--radius-pill);
   background: var(--accent-info-dim);
   color: var(--accent-info);
 }
 .badge-muted { background: var(--panel-hover); color: var(--muted); }
 .badge-ok { background: var(--accent-ok-dim); color: var(--accent-ok); }
 .badge-danger { background: var(--accent-danger-dim); color: var(--accent-danger); }
+
+/* --- Shared stat card grid (Network Detection's StatsGrid, Scheduling's
+   FitnessScorecard) --- */
+.stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.stat-card {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.stat-card:hover {
+  border-color: var(--line-light);
+  box-shadow: var(--shadow-sm);
+}
+
+.stat-card .num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.stat-card .lbl {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.stat-card.danger .num { color: var(--accent-danger); }
+.stat-card.ok .num { color: var(--accent-ok); }
+.stat-card.warning .num { color: var(--accent-warning); }
 
 /* Strips default <fieldset> box styling so it can wrap a form purely to
    disable all its controls at once (e.g. while a request is in flight)
@@ -186,7 +227,7 @@ body {
 
 ::-webkit-scrollbar-thumb {
   background: var(--line-light);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 
 ::-webkit-scrollbar-thumb:hover {

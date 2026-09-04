@@ -1,11 +1,12 @@
 import React from 'react';
+import { TOKEN_COLORS } from '../../styles/tokenColors.js';
 
 const CIRC = 2 * Math.PI * 40;
 
 export default function CoverageGauge({ covered, total }) {
   const pct = total > 0 ? (covered / total) * 100 : 0;
   const offset = CIRC - (pct / 100) * CIRC;
-  const color = pct >= 90 ? '#2ed8a7' : pct >= 60 ? '#f5a623' : '#ff4d5e';
+  const color = pct >= 90 ? TOKEN_COLORS.ok : pct >= 60 ? TOKEN_COLORS.warning : TOKEN_COLORS.danger;
 
   return (
     <div className="gauge-wrap">

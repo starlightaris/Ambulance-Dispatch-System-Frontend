@@ -22,17 +22,15 @@ export default function Sidebar({
     <aside className="sidebar">
       <div className="brand">
   <div className="eyebrow">Live Dispatch Monitoring</div>
-  <h1>Coverage Console</h1>
+  <h1>Coverage console</h1>
   <p>Real-time ambulance coverage across the city road network, powered by shortest-path analysis.</p>
-  <StatusBadge
-    connected={connected}
-    connectedLabel="live — connected to database"
-    disconnectedLabel="connecting to /api/v1/network …"
-  />
+  <StatusBadge tone={connected ? 'ok' : 'muted'}>
+    {connected ? 'live — connected to database' : 'connecting to /api/v1/network …'}
+  </StatusBadge>
       </div>
 
       <div className="section">
-        <h2>Fleet Coverage</h2>
+        <h2>Fleet coverage</h2>
         <CoverageGauge covered={nodeCount - blindSpots.length} total={nodeCount} />
       </div>
 
@@ -42,12 +40,12 @@ export default function Sidebar({
       </div>
 
       <div className="section">
-        <h2>Coverage Curve</h2>
+        <h2>Coverage curve</h2>
         <CoverageCurveChart data={coverageCurve} />
       </div>
 
       <div className="section">
-        <h2>Live Stats</h2>
+        <h2>Live stats</h2>
         <StatsGrid
           nodeCount={nodeCount}
           edgeCount={edgeCount}
@@ -57,7 +55,7 @@ export default function Sidebar({
       </div>
 
       <div className="section">
-        <h2>Blind Spots (nearest station distance &gt; threshold)</h2>
+        <h2>Blind spots (nearest station distance &gt; threshold)</h2>
         <BlindSpotList blindSpots={blindSpots} onSelect={onSelectBlindSpot} />
       </div>
 
