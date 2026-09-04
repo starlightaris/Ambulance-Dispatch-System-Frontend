@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatLabel } from '../../utils/formatLabel.js';
 
 const formatEquipment = (equipment = []) =>
   equipment.length === 0 ? 'No equipment listed' : equipment.map((item) => item.replace(/_/g, ' ')).join(', ');
@@ -21,7 +22,7 @@ export default function AmbulanceMatcher({ emergency, matches, isLoading, error,
         <div className="panel-heading">
           <h3>Ambulance match</h3>
         </div>
-        <p>Asking the dispatch scheduler for the current ranking...</p>
+        <p>Asking the dispatch scheduler for the current ranking…</p>
       </div>
     );
   }
@@ -64,7 +65,7 @@ export default function AmbulanceMatcher({ emergency, matches, isLoading, error,
       <div className="panel-heading match-heading">
         <h3>Ambulance match</h3>
         <button type="button" className="dispatch-button" onClick={() => onDispatch()} disabled={isDispatching}>
-          {isDispatching ? 'Dispatching...' : 'Dispatch best match'}
+          {isDispatching ? 'Dispatching…' : 'Dispatch best match'}
         </button>
       </div>
 
@@ -106,7 +107,7 @@ export default function AmbulanceMatcher({ emergency, matches, isLoading, error,
             </div>
             <div>
               <span className="mini-label">Status</span>
-              <strong>{match.status}</strong>
+              <strong>{formatLabel(match.status)}</strong>
             </div>
           </div>
 
