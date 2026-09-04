@@ -100,6 +100,7 @@ export async function allocateAmbulance(callId) {
     throw new Error(payload?.message || `HTTP ${response.status}`);
   }
 
+<<<<<<< Updated upstream
   return {
     dispatched: Boolean(payload?.dispatched),
     callId: payload?.callId ?? callId,
@@ -108,3 +109,36 @@ export async function allocateAmbulance(callId) {
       ?? (payload?.dispatched ? 'Dispatch completed.' : 'No suitable ambulance available at this time.')
   };
 }
+=======
+  return text || 'Dispatch completed';
+}
+
+// Added endpoints for Dashboard context
+export async function fetchTriageQueue() {
+  try {
+    const payload = await safeFetchJson('/api/v1/triage/assessments/queue');
+    return Array.isArray(payload) ? payload : [];
+  } catch (err) {
+    return [];
+  }
+}
+
+export async function calculateRoute(origin, destination) {
+  try {
+    const response = await fetch('/api/v1/routes', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ origin, destination })
+    });
+    
+    if (!response.ok) {
+      return null;
+    }
+    return await response.json();
+  } catch (err) {
+    return null;
+  }
+}
+>>>>>>> Stashed changes
