@@ -1,3 +1,5 @@
+import { getJson, postJson } from './client.js';
+
 const normalizeEquipment = (equipment) => {
   if (!Array.isArray(equipment)) {
     return [];
@@ -43,24 +45,15 @@ const normalizeCandidate = (candidate) => ({
   score: Number(candidate.score ?? 0)
 });
 
-async function safeFetchJson(url) {
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw new Error(`${url} -> HTTP ${res.status}`);
-  }
-
-  return res.json();
-}
-
 export async function fetchPendingEmergencies() {
-  const payload = await safeFetchJson('/api/v1/calls/pending');
+  const payload = await getJson('/api/v1/calls/pending');
   const list = Array.isArray(payload) ? payload : [payload].filter(Boolean);
 
   return list.map(normalizeEmergency);
 }
 
 export async function fetchAvailableAmbulances() {
-  const payload = await safeFetchJson('/api/v1/calls/ambulances');
+  const payload = await getJson('/api/v1/calls/ambulances');
   const list = Array.isArray(payload) ? payload : [payload].filter(Boolean);
 
   return list
@@ -73,32 +66,20 @@ export async function fetchAvailableAmbulances() {
  * Dispatches nothing; safe to call whenever the selected emergency changes.
  */
 export async function fetchDispatchCandidates(callId) {
-  const payload = await safeFetchJson(`/api/v1/calls/${callId}/candidates`);
+  const payload = await getJson(`/api/v1/calls/${callId}/candidates`);
   const list = Array.isArray(payload) ? payload : [];
 
   return list.map(normalizeCandidate);
 }
 
 /**
- * POST /{id}/dispatch. The backend now replies with a DispatchResultDto
- * ({ dispatched, callId, ambulanceVehicleNumber, message }), not plain text -
- * callers must check `dispatched` themselves; a 200 response does not mean an
+ * POST /{id}/dispatch. The backend replies with a DispatchResultDto
+ * ({ dispatched, callId, ambulanceVehicleNumber, message }) - callers must
+ * check `dispatched` themselves; a successful response does not mean an
  * ambulance was actually assigned (it may just mean none was available).
  */
 export async function allocateAmbulance(callId) {
-  const url = `/api/v1/calls/${callId}/dispatch`;
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  });
-
-  const payload = await response.json().catch(() => null);
-
-  if (!response.ok) {
-    throw new Error(payload?.message || `HTTP ${response.status}`);
-  }
+  const payload = await postJson(`/api/v1/calls/${callId}/dispatch`);
 
   return {
     dispatched: Boolean(payload?.dispatched),
