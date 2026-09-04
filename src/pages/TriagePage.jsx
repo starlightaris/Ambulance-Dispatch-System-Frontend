@@ -8,6 +8,7 @@ import '../styles/triage.css';
 export default function TriagePage() {
   const [activeQueue, setActiveQueue] = useState([]);
   const [latestResult, setLatestResult] = useState(null);
+  const [latestAssessment, setLatestAssessment] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -41,6 +42,7 @@ export default function TriagePage() {
     setErrorMessage('');
     try {
       setLatestResult(await evaluateTriage(assessment));
+      setLatestAssessment(assessment);
       await loadQueue({ showLoader: false });
     } catch (error) {
       setErrorMessage(error.message);
@@ -71,7 +73,7 @@ export default function TriagePage() {
       </header>
       {errorMessage && <div className="triage-error" role="alert"><span>{errorMessage}</span><button type="button" onClick={() => loadQueue()}>Retry</button><button type="button" aria-label="Dismiss" onClick={() => setErrorMessage('')}>×</button></div>}
       <div className="triage-dashboard">
-        <section><TriageForm isSubmitting={isSubmitting} onSubmit={handleEvaluate} /><TriageResult result={latestResult} /></section>
+        <section><TriageForm isSubmitting={isSubmitting} onSubmit={handleEvaluate} /><TriageResult result={latestResult} assessment={latestAssessment} /></section>
         <TriageQueue activeQueue={activeQueue} isLoading={isLoading} isConnected={isConnected} resolvingId={resolvingId} lastUpdated={lastUpdated} onRefresh={() => loadQueue()} onResolve={handleResolve} />
       </div>
     </main>
