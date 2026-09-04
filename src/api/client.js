@@ -1,44 +1,34 @@
-// Relative paths only. In dev, vite.config.js proxies /api to
-// http://localhost:8080. In production (after `npm run build`,
-// served by Spring Boot itself) these resolve on the same origin.
-
-async function readBody(res) {
-  const text = await res.text();
-
-  try {
-    return JSON.parse(text);
-  } catch {
-    return text;
-  }
-}
-
-function getErrorMessage(url, res, body) {
-  const message = body && typeof body === 'object' ? body.message : body;
-  return `${url} -> HTTP ${res.status}${message ? ` ${message}` : ''}`;
-}
-
-export async function getJson(url) {
-  const res = await fetch(url);
-  const body = await readBody(res);
-
+async function handle(res, url) {
   if (!res.ok) {
-    throw new Error(getErrorMessage(url, res, body));
+    let message = `${url} -> HTTP ${res.status}`;
+    try {
+      const body = await res.json();
+      if (body?.message) message = body.message;
+    } catch {
+      // response wasn't JSON — fall back to the generic message above
+    }
+    throw new Error(message);
   }
-
-  return body;
+  return res.status === 204 ? null : res.json();
 }
 
-export async function postJson(url, body) {
-  const res = await fetch(url, {
+export function getJson(url) {
+  return fetch(url).then((res) => handle(res, url));
+}
+export function postJson(url, body) {
+  return fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
-  });
-  const responseBody = await readBody(res);
-
-  if (!res.ok) {
-    throw new Error(getErrorMessage(url, res, responseBody));
-  }
-
-  return responseBody;
+  }).then((res) => handle(res, url));
+}
+export function putJson(url, body) {
+  return fetch(url, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  }).then((res) => handle(res, url));
+}
+export function deleteJson(url) {
+  return fetch(url, { method: 'DELETE' }).then((res) => handle(res, url));
 }

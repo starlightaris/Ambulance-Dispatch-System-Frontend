@@ -8,6 +8,7 @@ import {
   fetchBlindSpots,
   fetchCoverageCurve
 } from '../api/networkDetection.api.js';
+import 'leaflet/dist/leaflet.css';
 import '../styles/network-detection.css';
 
 const CURVE_THRESHOLDS = [5, 10, 15, 20, 25, 30, 35, 40];
