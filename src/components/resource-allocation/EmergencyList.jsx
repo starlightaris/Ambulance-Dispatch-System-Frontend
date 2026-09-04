@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatLabel } from '../../utils/formatLabel.js';
 
 const formatEquipment = (equipment = []) =>
   equipment.length === 0 ? 'No special equipment required' : equipment.map((item) => item.replace(/_/g, ' ')).join(', ');
@@ -8,7 +9,7 @@ export default function EmergencyList({ emergencies, selectedId, onSelect }) {
     return (
       <div className="resource-panel empty-panel">
         <h3>Pending emergencies</h3>
-        <p>No emergency calls are currently queued for allocation.</p>
+        <p>No emergencies are currently queued for allocation.</p>
       </div>
     );
   }
@@ -35,7 +36,7 @@ export default function EmergencyList({ emergencies, selectedId, onSelect }) {
               <div className="emergency-topline">
                 <span className="emergency-id">#{emergency.id}</span>
                 <span className={`urgency-pill ${String(patient.urgencyLevel || emergency.status).toLowerCase()}`}>
-                  {patient.urgencyLevel || emergency.status}
+                  {formatLabel(patient.urgencyLevel || emergency.status)}
                 </span>
               </div>
 
@@ -43,7 +44,7 @@ export default function EmergencyList({ emergencies, selectedId, onSelect }) {
 
               <div className="emergency-meta">
                 <span>Location: {emergency.locationNode}</span>
-                <span>Status: {emergency.status}</span>
+                <span>Status: {formatLabel(emergency.status)}</span>
               </div>
 
               <div className="equipment-row">

@@ -73,7 +73,7 @@ export default function RoutingPage() {
   return (
     <div className="routing-page">
       <div className="routing-panel">
-        <h1>Route Optimization</h1>
+        <h1>Route optimization</h1>
 
         <form onSubmit={handleSubmit} className="routing-form">
           <label>
@@ -105,7 +105,7 @@ export default function RoutingPage() {
           </label>
 
           <button type="submit" disabled={loading || picking}>
-            {loading ? 'Finding route…' : 'Find Route'}
+            {loading ? 'Finding route…' : 'Find route'}
           </button>
         </form>
 

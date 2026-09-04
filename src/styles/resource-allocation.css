@@ -42,7 +42,7 @@
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -71,7 +71,7 @@
 .resource-card {
   background: var(--panel);
   border: 1px solid var(--line);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
   padding: 18px 20px;
   min-height: 110px;
@@ -112,7 +112,7 @@
 
 .resource-alert {
   margin-bottom: 18px;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   padding: 12px 14px;
   font-size: 14px;
   border: 1px solid transparent;
@@ -150,7 +150,7 @@
 .resource-panel {
   background: var(--panel);
   border: 1px solid var(--line);
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   padding: 18px;
   box-shadow: var(--shadow-sm);
 }
@@ -189,7 +189,7 @@
   width: 100%;
   background: rgba(255, 255, 255, 0.15);
   border: 1px solid var(--line);
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   padding: 14px 14px 12px;
   text-align: left;
   cursor: pointer;
@@ -226,7 +226,7 @@
 
 .urgency-pill {
   padding: 5px 8px;
-  border-radius: 10px;
+  border-radius: var(--radius-pill);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -285,7 +285,7 @@
 
 .dispatch-button {
   border: none;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   background: linear-gradient(135deg, var(--accent-ok), #10b981);
   color: white;
   font-weight: 700;
@@ -320,7 +320,7 @@
 .match-card {
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid var(--line);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   padding: 16px;
   margin-bottom: 14px;
 }
@@ -337,7 +337,7 @@
   font-size: 10px;
   font-weight: 700;
   padding: 4px 7px;
-  border-radius: 99px;
+  border-radius: var(--radius-pill);
   margin-right: 8px;
 }
 
@@ -348,7 +348,7 @@
 
 .score-box {
   padding: 7px 10px;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   background: rgba(79, 70, 229, 0.08);
   color: var(--accent-info);
   font-size: 12px;
@@ -385,7 +385,7 @@
 .winning-callout {
   margin-top: 18px;
   padding: 14px 16px;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   background: rgba(5, 150, 105, 0.08);
   border: 1px solid rgba(5, 150, 105, 0.2);
   color: var(--text);
@@ -394,7 +394,7 @@
 .no-match-box {
   padding: 18px;
   border: 1px dashed rgba(225, 29, 72, 0.4);
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   background: rgba(225, 29, 72, 0.04);
 }
 

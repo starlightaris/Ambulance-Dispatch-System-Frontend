@@ -186,7 +186,7 @@ export default function ResourceAllocationPage() {
       <div className="resource-stat-grid">
         <ResourceCard title="Active emergencies" value={emergencies.length} meta="Queued calls" tone="info" />
         <ResourceCard title="Available ambulances" value={availableAmbulances} meta="Ready to dispatch" tone="ok" />
-        <ResourceCard title="Required equipment" value={selectedRequirementCount} meta={selectedEmergency ? selectedEmergency.locationNode : 'Select a case'} tone="warning" />
+        <ResourceCard title="Required equipment" value={selectedRequirementCount} meta={selectedEmergency ? selectedEmergency.locationNode : 'Select an emergency'} tone="warning" />
       </div>
 
       {error ? <div className="resource-alert error">{error}</div> : null}
@@ -198,7 +198,7 @@ export default function ResourceAllocationPage() {
 
       {loading ? (
         <div className="resource-panel loading-panel">
-          <h3>Loading allocation queue...</h3>
+          <h3>Loading allocation queue…</h3>
         </div>
       ) : (
         <div className="resource-layout">
@@ -220,7 +220,7 @@ export default function ResourceAllocationPage() {
               isDispatching={isDispatching}
               summaryText={
                 matches[0]
-                  ? `Best fit: ${matches[0].vehicleNumber} matches all equipment and reaches the incident in ${matches[0].travelMinutes.toFixed(1)} min (computed by the backend's greedy scheduler).`
+                  ? `Best fit: ${matches[0].vehicleNumber} matches all equipment and reaches the emergency in ${matches[0].travelMinutes.toFixed(1)} min (computed by the backend's greedy scheduler).`
                   : 'No ambulance currently satisfies all required equipment.'
               }
             />

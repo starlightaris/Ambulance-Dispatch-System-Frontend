@@ -75,7 +75,7 @@ export default function TriagePage() {
   return (
     <main className="triage-page">
       <header className="triage-header">
-        <div><span>TASK 04 · AMBULANCE DISPATCH</span><h1>Triage command</h1></div>
+        <div><span>Live dispatch · triage</span><h1>Triage command</h1></div>
         <p className={isConnected ? 'triage-online' : ''}>● {isConnected ? 'Decision engine online' : 'Backend unavailable'}</p>
       </header>
       {errorMessage && <div className="triage-error" role="alert"><span>{errorMessage}</span><button type="button" onClick={() => loadQueue()}>Retry</button><button type="button" aria-label="Dismiss" onClick={() => setErrorMessage('')}>×</button></div>}

@@ -1,5 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Polyline, Popup, useMap } from 'react-leaflet';
+import { TOKEN_COLORS } from '../../styles/tokenColors.js';
+import { formatLabel } from '../../utils/formatLabel.js';
 
 
 function FitBounds({ nodes }) {
@@ -51,7 +53,7 @@ export default function MapView({ nodes, edges, ambulances, blindSpots, threshol
                     key={e.id}
                     positions={[[from.latitude, from.longitude], [to.latitude, to.longitude]]}
                     pathOptions={{
-                      color: e.blocked ? '#e11d48' : '#64748b',
+                      color: e.blocked ? TOKEN_COLORS.danger : TOKEN_COLORS.muted,
                       weight: e.blocked ? 2.5 : 1.8,
                       dashArray: e.blocked ? '4,4' : null,
                       opacity: e.blocked ? 0.9 : 0.65
@@ -60,7 +62,7 @@ export default function MapView({ nodes, edges, ambulances, blindSpots, threshol
                   <Popup>
                     <div className="popup-title">{e.fromNode} → {e.toNode}</div>
                     <div className="popup-row">{e.travelTimeMinutes.toFixed(1)} min · {e.distanceKm.toFixed(2)} km</div>
-                    <div className="popup-row">{e.blocked ? 'BLOCKED' : 'open'}</div>
+                    <div className="popup-row">{e.blocked ? 'Blocked' : 'Open'}</div>
                   </Popup>
                 </Polyline>
             );
@@ -71,18 +73,18 @@ export default function MapView({ nodes, edges, ambulances, blindSpots, threshol
                   key={n.id}
                   center={[n.latitude, n.longitude]}
                   radius={4}
-                  pathOptions={{ color: '#4f46e5', weight: 1.5, fillColor: '#6366f1', fillOpacity: 0.9 }}
+                  pathOptions={{ color: TOKEN_COLORS.info, weight: 1.5, fillColor: '#6366f1', fillOpacity: 0.9 }}
               >
                 <Popup>
                   <div className="popup-title">{n.name}</div>
-                  <div className="popup-row">id: {n.id}</div>
+                  <div className="popup-row">ID: {n.id}</div>
                   <div className="popup-row">{n.latitude.toFixed(5)}, {n.longitude.toFixed(5)}</div>
                 </Popup>
               </CircleMarker>
           ))}
 
           {ambulances.filter((a) => a.latitude != null && a.longitude != null).map((a) => {
-            const color = a.status === 'AVAILABLE' ? '#059669' : '#d97706';
+            const color = a.status === 'AVAILABLE' ? TOKEN_COLORS.ok : TOKEN_COLORS.warning;
             return (
                 <CircleMarker
                     key={a.id}
@@ -92,8 +94,8 @@ export default function MapView({ nodes, edges, ambulances, blindSpots, threshol
                 >
                   <Popup>
                     <div className="popup-title">{a.vehicleNumber}</div>
-                    <div className="popup-row">status: {a.status}</div>
-                    <div className="popup-row">at: {a.currentLocationNode}</div>
+                    <div className="popup-row">Status: {formatLabel(a.status)}</div>
+                    <div className="popup-row">At: {a.currentLocationNode}</div>
                   </Popup>
                 </CircleMarker>
             );
@@ -104,7 +106,7 @@ export default function MapView({ nodes, edges, ambulances, blindSpots, threshol
                   key={`blind-${n.id}`}
                   center={[n.latitude, n.longitude]}
                   radius={9}
-                  pathOptions={{ color: '#e11d48', weight: 2, fillColor: '#e11d48', fillOpacity: 0.35 }}
+                  pathOptions={{ color: TOKEN_COLORS.danger, weight: 2, fillColor: TOKEN_COLORS.danger, fillOpacity: 0.35 }}
               >
                 <Popup>
                   <div className="popup-title">⚠ Blind spot: {n.name}</div>
