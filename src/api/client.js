@@ -1,26 +1,34 @@
-// Relative paths only. In dev, vite.config.js proxies /api to
-// http://localhost:8080. In production (after `npm run build`,
-// served by Spring Boot itself) these resolve on the same origin.
-
-export async function getJson(url) {
-  const res = await fetch(url);
+async function handle(res, url) {
   if (!res.ok) {
-    throw new Error(`${url} -> HTTP ${res.status}`);
+    let message = `${url} -> HTTP ${res.status}`;
+    try {
+      const body = await res.json();
+      if (body?.message) message = body.message;
+    } catch {
+      // response wasn't JSON — fall back to the generic message above
+    }
+    throw new Error(message);
   }
-  return res.json();
+  return res.status === 204 ? null : res.json();
 }
 
-export async function postJson(url, body) {
-  const res = await fetch(url, {
+export function getJson(url) {
+  return fetch(url).then((res) => handle(res, url));
+}
+export function postJson(url, body) {
+  return fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    // Backend throws IllegalArgumentException / IllegalStateException
-    // for bad IDs or no available route — surface that message.
-    const text = await res.text().catch(() => '');
-    throw new Error(`${url} -> HTTP ${res.status} ${text}`);
-  }
-  return res.json();
+  }).then((res) => handle(res, url));
+}
+export function putJson(url, body) {
+  return fetch(url, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  }).then((res) => handle(res, url));
+}
+export function deleteJson(url) {
+  return fetch(url, { method: 'DELETE' }).then((res) => handle(res, url));
 }
