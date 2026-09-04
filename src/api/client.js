@@ -9,3 +9,18 @@ export async function getJson(url) {
   }
   return res.json();
 }
+
+export async function postJson(url, body) {
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    // Backend throws IllegalArgumentException / IllegalStateException
+    // for bad IDs or no available route — surface that message.
+    const text = await res.text().catch(() => '');
+    throw new Error(`${url} -> HTTP ${res.status} ${text}`);
+  }
+  return res.json();
+}
