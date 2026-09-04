@@ -27,7 +27,7 @@ export default function Sidebar({
   <StatusBadge
     connected={connected}
     connectedLabel="live — connected to database"
-    disconnectedLabel="connecting to /api/network …"
+    disconnectedLabel="connecting to /api/v1/network …"
   />
       </div>
 
