@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import EmergencyList from '../components/resource-allocation/EmergencyList.jsx';
 import AmbulanceMatcher from '../components/resource-allocation/AmbulanceMatcher.jsx';
-import ResourceCard from '../components/resource-allocation/ResourceCard.jsx';
+import ResourceCard from '../components/common/ResourceCard.jsx';
 import {
   fetchPendingEmergencies,
   fetchAvailableAmbulances,

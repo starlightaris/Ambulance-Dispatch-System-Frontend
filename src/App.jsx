@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import NavBar from './components/common/NavBar.jsx';
+import DashboardPage from './pages/DashboardPage.jsx';
 import NetworkDetectionPage from './pages/NetworkDetectionPage.jsx';
 import TriagePage from './pages/TriagePage.jsx';
 import SchedulingPage from './pages/SchedulingPage.jsx';
@@ -14,7 +15,8 @@ export default function App() {
         <NavBar />
         <div className="app-content">
           <Routes>
-            <Route path="/" element={<NetworkDetectionPage />} />
+            <Route path="/" element={<DashboardPage />} />
+            <Route path="/network-detection" element={<NetworkDetectionPage />} />
             <Route path="/triage" element={<TriagePage />} />
             <Route path="/scheduling" element={<SchedulingPage />} />
             <Route path="/resource-allocation" element={<ResourceAllocationPage />} />
