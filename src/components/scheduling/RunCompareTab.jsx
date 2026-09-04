@@ -26,6 +26,12 @@ const GA_FIELDS = [
   ['convergenceThreshold', 'Improvement needed to keep refining'],
   ['convergenceWindow', 'Rounds checked for that improvement'],
 ];
+// GAParametersOverride.java binds these as Integer (the rest are Double) - a
+// decimal value here fails Jackson deserialization server-side, so both the
+// input step and the parsing below need to treat them differently from the
+// Double fields.
+const GA_INTEGER_FIELDS = new Set(['populationSize', 'maxGenerations', 'elitismCount', 'tournamentSize', 'convergenceWindow']);
+
 const FITNESS_FIELDS = [
   ['understaffedPenalty', 'Avoid unfilled shifts'],
   ['overtimePenaltyPerHour', 'Avoid overtime'],
@@ -35,10 +41,11 @@ const FITNESS_FIELDS = [
 ];
 const emptyOverride = (fields) => Object.fromEntries(fields.map(([f]) => [f, '']));
 
-function cleanOverride(override) {
+function cleanOverride(override, integerFields = new Set()) {
   const result = {};
   for (const [key, value] of Object.entries(override)) {
-    if (value !== '') result[key] = parseFloat(value);
+    if (value === '') continue;
+    result[key] = integerFields.has(key) ? parseInt(value, 10) : parseFloat(value);
   }
   return Object.keys(result).length > 0 ? result : null;
 }
@@ -85,7 +92,7 @@ export default function RunCompareTab() {
       const request = {
         weekStarting,
         randomSeed: randomSeed === '' ? undefined : parseInt(randomSeed, 10),
-        gaParameters: cleanOverride(gaOverride),
+        gaParameters: cleanOverride(gaOverride, GA_INTEGER_FIELDS),
         fitnessWeights: cleanOverride(fitnessOverride),
         persist: mode === 'run' ? persist : false,
       };
@@ -160,7 +167,7 @@ export default function RunCompareTab() {
                     {GA_FIELDS.map(([field, label]) => (
                       <label className="run-compare-field" key={field}>
                         <span>{label}</span>
-                        <input type="number" step="any"
+                        <input type="number" step={GA_INTEGER_FIELDS.has(field) ? '1' : 'any'}
                           placeholder={defaults ? String(defaults.gaParameters[field]) : ''}
                           value={gaOverride[field]}
                           onChange={(e) => setGaOverride((o) => ({ ...o, [field]: e.target.value }))} />
