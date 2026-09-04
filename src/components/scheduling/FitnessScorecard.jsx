@@ -28,7 +28,7 @@ export default function FitnessScorecard({ result, algorithmName, executionTimeM
         </div>
       </div>
       <div className="fitness-scorecard-total">
-        <span>Fitness Score</span>
+        <span>Fitness score</span>
         <span className="fitness-scorecard-score">{result.fitness.toFixed(1)}</span>
       </div>
     </div>

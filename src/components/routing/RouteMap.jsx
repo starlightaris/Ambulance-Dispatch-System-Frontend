@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Polyline, Popup, useMap } from 'react-leaflet';
+import { TOKEN_COLORS } from '../../styles/tokenColors.js';
 
 // Re-fits the viewport whenever the set of points to show changes — the full
 // node list on first load, then just the route once one's been found.
@@ -45,14 +46,14 @@ export default function RouteMap({ allNodes, route }) {
             key={n.id}
             center={[n.latitude, n.longitude]}
             radius={3}
-            pathOptions={{ color: '#94a3b8', weight: 1, fillColor: '#cbd5e1', fillOpacity: 0.6 }}
+            pathOptions={{ color: TOKEN_COLORS.lineLight, weight: 1, fillColor: TOKEN_COLORS.line, fillOpacity: 0.6 }}
           >
             <Popup>{n.name}</Popup>
           </CircleMarker>
         ))}
 
         {hasRoute && (
-          <Polyline positions={routeLatLngs} pathOptions={{ color: '#4f46e5', weight: 4, opacity: 0.9 }} />
+          <Polyline positions={routeLatLngs} pathOptions={{ color: TOKEN_COLORS.info, weight: 4, opacity: 0.9 }} />
         )}
 
         {waypoints.map((n, i) => (
@@ -60,7 +61,7 @@ export default function RouteMap({ allNodes, route }) {
             key={n.id}
             center={[n.latitude, n.longitude]}
             radius={5}
-            pathOptions={{ color: '#4f46e5', weight: 2, fillColor: '#6366f1', fillOpacity: 0.9 }}
+            pathOptions={{ color: TOKEN_COLORS.info, weight: 2, fillColor: '#6366f1', fillOpacity: 0.9 }}
           >
             <Popup>{i + 2}. {n.name}</Popup>
           </CircleMarker>
@@ -70,7 +71,7 @@ export default function RouteMap({ allNodes, route }) {
           <CircleMarker
             center={[start.latitude, start.longitude]}
             radius={8}
-            pathOptions={{ color: '#059669', weight: 2, fillColor: '#059669', fillOpacity: 0.9 }}
+            pathOptions={{ color: TOKEN_COLORS.ok, weight: 2, fillColor: TOKEN_COLORS.ok, fillOpacity: 0.9 }}
           >
             <Popup>Start: {start.name}</Popup>
           </CircleMarker>
@@ -80,7 +81,7 @@ export default function RouteMap({ allNodes, route }) {
           <CircleMarker
             center={[destination.latitude, destination.longitude]}
             radius={8}
-            pathOptions={{ color: '#e11d48', weight: 2, fillColor: '#e11d48', fillOpacity: 0.9 }}
+            pathOptions={{ color: TOKEN_COLORS.danger, weight: 2, fillColor: TOKEN_COLORS.danger, fillOpacity: 0.9 }}
           >
             <Popup>Destination: {destination.name}</Popup>
           </CircleMarker>
@@ -88,7 +89,7 @@ export default function RouteMap({ allNodes, route }) {
       </MapContainer>
 
       {!hasRoute && (
-        <div className="routing-map-badge">Select a start and destination, then Find Route</div>
+        <div className="routing-map-badge">Select a start and destination, then Find route</div>
       )}
     </div>
   );

@@ -2,14 +2,11 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { fetchStaff, createStaff, updateStaff, deleteStaff } from '../../api/scheduling.api.js';
 import EmptyState from '../common/EmptyState.jsx';
 import StatusBadge from '../common/StatusBadge.jsx';
+import { formatLabel } from '../../utils/formatLabel.js';
 
 const ROLES = ['DOCTOR', 'PARAMEDIC', 'DRIVER'];
 const CERTIFICATIONS = ['BASIC_LIFE_SUPPORT', 'ADVANCED_LIFE_SUPPORT', 'ECG_CERTIFIED', 'ICU_TRAINED'];
 const EMPTY_FORM = { name: '', role: 'DOCTOR', certifications: [], maxWeeklyHours: 40 };
-
-function formatLabel(value) {
-  return value.toLowerCase().split('_').map((w) => w[0].toUpperCase() + w.slice(1)).join(' ');
-}
 
 export default function StaffTab() {
   const [staff, setStaff] = useState([]);
@@ -110,7 +107,7 @@ export default function StaffTab() {
           <h2>Staff</h2>
           <p className="tab-subtitle">Manage who's available to work, their role, and their certifications.</p>
         </div>
-        <button type="button" className="btn-primary" onClick={openCreateForm}>+ Add Staff</button>
+        <button type="button" className="btn-primary" onClick={openCreateForm}>+ Add staff</button>
       </div>
 
       {error && <div className="form-error">{error}</div>}
@@ -118,7 +115,7 @@ export default function StaffTab() {
       {formOpen && (
         <form className="entity-form" onSubmit={handleSubmit}>
           <fieldset disabled={saving} className="fieldset-plain">
-            <h3 className="entity-form-title">{editingId ? 'Edit Staff Member' : 'Add Staff Member'}</h3>
+            <h3 className="entity-form-title">{editingId ? 'Edit staff member' : 'Add staff member'}</h3>
 
             <div className="form-row">
               <label>
@@ -154,7 +151,7 @@ export default function StaffTab() {
 
             <div className="form-actions">
               <button type="submit" className="btn-primary">
-                {saving ? 'Saving…' : editingId ? 'Save Changes' : 'Add Staff'}
+                {saving ? 'Saving…' : editingId ? 'Save changes' : 'Add staff'}
               </button>
               <button type="button" className="btn-secondary" onClick={closeForm}>Cancel</button>
             </div>

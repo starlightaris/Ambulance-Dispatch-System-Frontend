@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { fetchShiftSlots, createShiftSlot, updateShiftSlot, deleteShiftSlot } from '../../api/scheduling.api.js';
 import EmptyState from '../common/EmptyState.jsx';
 import StatusBadge from '../common/StatusBadge.jsx';
+import { formatLabel } from '../../utils/formatLabel.js';
 
 const DAYS = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
 const CERTIFICATIONS = ['BASIC_LIFE_SUPPORT', 'ADVANCED_LIFE_SUPPORT', 'ECG_CERTIFIED', 'ICU_TRAINED'];
@@ -12,10 +13,6 @@ const EMPTY_FORM = {
   requiredCertification: '',
   requiredStaffCount: 1,
 };
-
-function formatLabel(value) {
-  return value.toLowerCase().split('_').map((w) => w[0].toUpperCase() + w.slice(1)).join(' ');
-}
 
 export default function ShiftSlotTab() {
   const [slots, setSlots] = useState([]);
@@ -109,10 +106,10 @@ export default function ShiftSlotTab() {
     <div className="shift-slot-tab">
       <div className="tab-header">
         <div className="tab-header-text">
-          <h2>Shift Template</h2>
+          <h2>Shift template</h2>
           <p className="tab-subtitle">Set the weekly coverage pattern the scheduler fills each week.</p>
         </div>
-        <button type="button" className="btn-primary" onClick={openCreateForm}>+ Add Shift Slot</button>
+        <button type="button" className="btn-primary" onClick={openCreateForm}>+ Add shift slot</button>
       </div>
 
       {error && <div className="form-error">{error}</div>}
@@ -120,7 +117,7 @@ export default function ShiftSlotTab() {
       {formOpen && (
         <form className="entity-form" onSubmit={handleSubmit}>
           <fieldset disabled={saving} className="fieldset-plain">
-            <h3 className="entity-form-title">{editingId ? 'Edit Shift Slot' : 'Add Shift Slot'}</h3>
+            <h3 className="entity-form-title">{editingId ? 'Edit shift slot' : 'Add shift slot'}</h3>
 
             <div className="form-row">
               <label>
@@ -156,7 +153,7 @@ export default function ShiftSlotTab() {
 
             <div className="form-actions">
               <button type="submit" className="btn-primary">
-                {saving ? 'Saving…' : editingId ? 'Save Changes' : 'Add Shift Slot'}
+                {saving ? 'Saving…' : editingId ? 'Save changes' : 'Add shift slot'}
               </button>
               <button type="button" className="btn-secondary" onClick={closeForm}>Cancel</button>
             </div>

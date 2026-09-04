@@ -4,6 +4,7 @@ import FitnessScorecard from './FitnessScorecard.jsx';
 import ConvergenceChart from './ConvergenceChart.jsx';
 import EmptyState from '../common/EmptyState.jsx';
 import { mondayFromWeekValue, currentWeekValue } from './dateUtils.js';
+import { TOKEN_COLORS } from '../../styles/tokenColors.js';
 
 // Friendly display names for what the backend calls algorithms — the raw
 // names ("Genetic Algorithm", "Greedy") stay in API payloads and are fine
@@ -118,8 +119,8 @@ export default function RunCompareTab() {
             </label>
 
             <div className="mode-toggle">
-              <button type="button" className={`mode-btn${mode === 'run' ? ' active' : ''}`} onClick={() => setMode('run')}>Generate Schedule</button>
-              <button type="button" className={`mode-btn${mode === 'compare' ? ' active' : ''}`} onClick={() => setMode('compare')}>Compare Methods</button>
+              <button type="button" className={`mode-btn${mode === 'run' ? ' active' : ''}`} onClick={() => setMode('run')}>Generate schedule</button>
+              <button type="button" className={`mode-btn${mode === 'compare' ? ' active' : ''}`} onClick={() => setMode('compare')}>Compare methods</button>
             </div>
           </div>
 
@@ -132,7 +133,7 @@ export default function RunCompareTab() {
 
           <div className="run-compare-status">
             {mode === 'run' && (
-              <EmptyState>Creates your schedule using our smart scheduling engine — recommended for everyday use. Switch to Compare Methods to see how it stacks up against a simpler approach.</EmptyState>
+              <EmptyState>Creates your schedule using our smart scheduling engine — recommended for everyday use. Switch to Compare methods to see how it stacks up against a simpler approach.</EmptyState>
             )}
 
             {weekStarting && existingRosterCount !== null && (
@@ -199,7 +200,7 @@ export default function RunCompareTab() {
 
           <div className="form-actions run-compare-actions">
             <button type="submit" className="btn-primary" disabled={!weekStarting}>
-              {running ? 'Generating…' : mode === 'run' ? 'Generate Schedule' : 'Compare Methods'}
+              {running ? 'Generating…' : mode === 'run' ? 'Generate schedule' : 'Compare methods'}
             </button>
           </div>
         </fieldset>
@@ -216,7 +217,7 @@ export default function RunCompareTab() {
           />
           <div className="run-compare-chart-block">
             <h4 className="run-compare-chart-title">How the schedule improved with each round</h4>
-            <ConvergenceChart series={[{ name: friendlyName(result.algorithmName), color: '#4f46e5', data: result.bestFitnessHistory }]} />
+            <ConvergenceChart series={[{ name: friendlyName(result.algorithmName), color: TOKEN_COLORS.info, data: result.bestFitnessHistory }]} />
           </div>
         </section>
       )}
@@ -243,8 +244,8 @@ export default function RunCompareTab() {
           <div className="run-compare-chart-block">
             <h4 className="run-compare-chart-title">How each method improved with each round</h4>
             <ConvergenceChart series={[
-              { name: friendlyName(result.geneticAlgorithm.algorithmName), color: '#4f46e5', data: result.geneticAlgorithm.bestFitnessHistory },
-              { name: friendlyName(result.greedy.algorithmName), color: '#d97706', data: result.greedy.bestFitnessHistory },
+              { name: friendlyName(result.geneticAlgorithm.algorithmName), color: TOKEN_COLORS.info, data: result.geneticAlgorithm.bestFitnessHistory },
+              { name: friendlyName(result.greedy.algorithmName), color: TOKEN_COLORS.warning, data: result.greedy.bestFitnessHistory },
             ]} />
           </div>
         </section>

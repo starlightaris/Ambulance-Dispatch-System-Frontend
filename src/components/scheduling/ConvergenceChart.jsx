@@ -1,6 +1,7 @@
 import React from 'react';
+import { TOKEN_COLORS } from '../../styles/tokenColors.js';
 
-const DEFAULT_COLORS = ['#4f46e5', '#d97706', '#059669', '#e11d48'];
+const DEFAULT_COLORS = [TOKEN_COLORS.info, TOKEN_COLORS.warning, TOKEN_COLORS.ok, TOKEN_COLORS.danger];
 
 export default function ConvergenceChart({ series }) {
   const plottable = series.filter((s) => s.data && s.data.length > 0);
@@ -38,7 +39,7 @@ export default function ConvergenceChart({ series }) {
       <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
         {gridValues.map((g) => (
           <line key={g} x1={padding.left} x2={width - padding.right} y1={yScale(g)} y2={yScale(g)}
-            stroke="#cbd5e1" strokeWidth="1" />
+            stroke={TOKEN_COLORS.line} strokeWidth="1" />
         ))}
 
         {plottable.map((s, i) => {
@@ -68,18 +69,18 @@ export default function ConvergenceChart({ series }) {
           );
         })}
 
-        <text x={padding.left} y={height - 6} fontSize="9" fill="#64748b" fontFamily="JetBrains Mono, monospace">
+        <text x={padding.left} y={height - 6} fontSize="9" fill={TOKEN_COLORS.muted} fontFamily="JetBrains Mono, monospace">
           gen 0
         </text>
-        <text x={width - padding.right} y={height - 6} fontSize="9" fill="#64748b" textAnchor="end"
+        <text x={width - padding.right} y={height - 6} fontSize="9" fill={TOKEN_COLORS.muted} textAnchor="end"
           fontFamily="JetBrains Mono, monospace">
           gen {maxGen}
         </text>
-        <text x={padding.left - 6} y={yScale(yMin) + 3} fontSize="9" fill="#64748b" textAnchor="end"
+        <text x={padding.left - 6} y={yScale(yMin) + 3} fontSize="9" fill={TOKEN_COLORS.muted} textAnchor="end"
           fontFamily="JetBrains Mono, monospace">
           {yMin.toFixed(0)}
         </text>
-        <text x={padding.left - 6} y={yScale(yMax) + 3} fontSize="9" fill="#64748b" textAnchor="end"
+        <text x={padding.left - 6} y={yScale(yMax) + 3} fontSize="9" fill={TOKEN_COLORS.muted} textAnchor="end"
           fontFamily="JetBrains Mono, monospace">
           {yMax.toFixed(0)}
         </text>
