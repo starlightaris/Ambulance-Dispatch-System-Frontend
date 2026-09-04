@@ -1,7 +1,7 @@
 import { postJson } from './client.js';
 
 /**
- * Calls POST /api/routing/find-route.
+ * Calls POST /api/v1/routes.
  *
  * Backend currently always runs A* internally (RouteServiceImpl ignores
  * the `algorithm` field for now), but we still send it so the request
@@ -14,7 +14,7 @@ import { postJson } from './client.js';
  * @returns {Promise<{algorithm: string, totalTravelTimeMinutes: number, totalDistanceKm: number, route: Array<{id:number, name:string, latitude:number, longitude:number}>}>}
  */
 export function findRoute(startLocationId, destinationLocationId, algorithm = 'ASTAR') {
-  return postJson('/api/routing/find-route', {
+  return postJson('/api/v1/routes', {
     startLocationId,
     destinationLocationId,
     algorithm,
