@@ -1,5 +1,3 @@
-import { getJson, postJson } from './client.js';
-
 const normalizeEquipment = (equipment) => {
   if (!Array.isArray(equipment)) {
     return [];
@@ -25,29 +23,21 @@ const inferEquipmentFromCategory = (category) => {
   return ['ECG_MONITOR'];
 };
 
-const normalizeEmergency = (call) => {
-  const id = call.id ?? call.callId ?? call.uuid;
-
-  if (id == null) {
-    throw new Error('Emergency response is missing a call identifier.');
-  }
-
-  return {
-    id,
-    patient: call.patient ?? {
-      name: call.patientName ?? 'Unknown patient',
-      condition: call.condition ?? 'Emergency condition',
-      urgencyLevel: call.urgencyLevel ?? call.category ?? 'HIGH'
-    },
-    condition: call.condition ?? call.patient?.condition ?? 'Emergency condition',
-    locationNode: call.locationNode ?? call.location ?? 'Node_Unknown',
-    status: call.status ?? 'RECEIVED',
-    requiredEquipment: normalizeEquipment(
-      call.requiredEquipment ?? call.patient?.requiredEquipment ?? inferEquipmentFromCategory(call.category ?? call.urgencyLevel)
-    ),
-    receivedAt: call.receivedAt ?? new Date().toISOString()
-  };
-};
+const normalizeEmergency = (call) => ({
+  id: call.id ?? call.callId ?? call.uuid ?? Date.now(),
+  patient: call.patient ?? {
+    name: call.patientName ?? 'Unknown patient',
+    condition: call.condition ?? 'Emergency condition',
+    urgencyLevel: call.urgencyLevel ?? call.category ?? 'HIGH'
+  },
+  condition: call.condition ?? call.patient?.condition ?? 'Emergency condition',
+  locationNode: call.locationNode ?? call.location ?? 'Node_Unknown',
+  status: call.status ?? 'RECEIVED',
+  requiredEquipment: normalizeEquipment(
+    call.requiredEquipment ?? call.patient?.requiredEquipment ?? inferEquipmentFromCategory(call.category ?? call.urgencyLevel)
+  ),
+  receivedAt: call.receivedAt ?? new Date().toISOString()
+});
 
 const normalizeAmbulance = (ambulance) => ({
   id: ambulance.id ?? ambulance.ambulanceId,
@@ -58,8 +48,18 @@ const normalizeAmbulance = (ambulance) => ({
   travelMinutes: Number(ambulance.travelMinutes ?? ambulance.distanceMinutes ?? ambulance.score ?? 0)
 });
 
+async function safeFetchJson(url) {
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error(`${url} -> HTTP ${res.status}`);
+  }
+
+  return res.json();
+}
+
+// Updated URL and return format
 export async function fetchPendingEmergencies() {
-  const payload = await getJson('/api/dispatch/pending');
+  const payload = await safeFetchJson('/api/v1/calls/pending');
   const list = Array.isArray(payload) ? payload : [payload].filter(Boolean);
   
   return list.map(normalizeEmergency);
@@ -67,7 +67,7 @@ export async function fetchPendingEmergencies() {
 
 // Updated URL and return format
 export async function fetchAvailableAmbulances() {
-  const payload = await getJson('/api/dispatch/ambulances');
+  const payload = await safeFetchJson('/api/v1/calls/ambulances');
   const list = Array.isArray(payload) ? payload : [payload].filter(Boolean);
 
   return list
@@ -78,7 +78,17 @@ export async function fetchAvailableAmbulances() {
 // Updated URL to match /{id}/dispatch
 export async function allocateAmbulance(callId) {
   const url = `/api/v1/calls/${callId}/dispatch`;
-  const result = await postJson(url);
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
 
-  return result || 'Dispatch completed';
+  const text = await response.text();
+  if (!response.ok) {
+    throw new Error(text || `HTTP ${response.status}`);
+  }
+
+  return text || 'Dispatch completed';
 }
