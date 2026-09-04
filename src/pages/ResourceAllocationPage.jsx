@@ -24,18 +24,21 @@ export default function ResourceAllocationPage() {
       setLoading(true);
       setError('');
 
-      try {
+     try {
         const [pendingResult, availableResult] = await Promise.all([
           fetchPendingEmergencies(),
           fetchAvailableAmbulances()
         ]);
 
-        setEmergencies(pendingResult.items);
-        setAmbulances(availableResult.items);
+        const pendingData = pendingResult || [];
+        const availableData = availableResult || [];
+
+        setEmergencies(pendingData);
+        setAmbulances(availableData);
         setDataSource('backend');
 
-        if (pendingResult.items.length > 0) {
-          setSelectedId((current) => current ?? pendingResult.items[0].id);
+        if (pendingData.length > 0) {
+          setSelectedId((current) => current ?? pendingData[0].id);
         } else {
           setSelectedId(null);
         }

@@ -57,30 +57,27 @@ async function safeFetchJson(url) {
   return res.json();
 }
 
+// Updated URL and return format
 export async function fetchPendingEmergencies() {
-  const payload = await safeFetchJson('/api/dispatch/pending');
+  const payload = await safeFetchJson('/api/v1/calls/pending');
   const list = Array.isArray(payload) ? payload : [payload].filter(Boolean);
-
-  return {
-    items: list.map(normalizeEmergency),
-    source: 'backend'
-  };
+  
+  return list.map(normalizeEmergency);
 }
 
+// Updated URL and return format
 export async function fetchAvailableAmbulances() {
-  const payload = await safeFetchJson('/api/dispatch/ambulances');
+  const payload = await safeFetchJson('/api/v1/calls/ambulances');
   const list = Array.isArray(payload) ? payload : [payload].filter(Boolean);
 
-  return {
-    items: list
-      .map(normalizeAmbulance)
-      .filter((ambulance) => ambulance.status === 'AVAILABLE'),
-    source: 'backend'
-  };
+  return list
+    .map(normalizeAmbulance)
+    .filter((ambulance) => ambulance.status === 'AVAILABLE');
 }
 
+// Updated URL to match /{id}/dispatch
 export async function allocateAmbulance(callId) {
-  const url = `/api/dispatch/allocate/${callId}`;
+  const url = `/api/v1/calls/${callId}/dispatch`;
   const response = await fetch(url, {
     method: 'POST',
     headers: {
