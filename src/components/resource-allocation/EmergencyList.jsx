@@ -50,12 +50,7 @@ export default function EmergencyList({ emergencies, selectedId, onSelect, onQui
                 </span>
               </div>
 
-<<<<<<< Updated upstream
               <h4>{patient.name || 'Unknown patient'}</h4>
-=======
-              <h4 className="ra-card-title">{patient.name || 'Unknown Patient'}</h4>
-              <p className="ra-card-desc">{patient.condition || emergency.condition}</p>
->>>>>>> Stashed changes
 
               <div className="ra-card-meta">
                 <div className="ra-meta-location">

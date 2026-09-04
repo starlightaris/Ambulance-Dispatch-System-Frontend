@@ -10,19 +10,21 @@ const normalizeEquipment = (equipment) => {
 };
 
 // Field names below mirror CallDto / AmbulanceDto / CandidateDto exactly
-// (src/main/java/.../resource_allocation/dto on the backend) - no guessed
-// alternate field names, since there's only one real shape to expect now.
+// (src/main/java/.../resource_allocation/dto on the backend)
 const normalizeEmergency = (call) => ({
   id: call.id,
   patient: {
     name: call.patientName ?? 'Unknown patient',
-    urgencyLevel: call.urgencyLevel ?? null
+    urgencyLevel: call.urgencyLevel ?? null,
+    condition: call.condition ?? null
   },
   locationNode: call.locationNode ?? 'Node_Unknown',
   status: call.status ?? 'RECEIVED',
   requiredEquipment: normalizeEquipment(call.requiredEquipment),
   receivedAt: call.receivedAt ?? null,
-  assignedAmbulanceVehicleNumber: call.assignedAmbulanceVehicleNumber ?? null
+  assignedAmbulanceVehicleNumber: call.assignedAmbulanceVehicleNumber ?? null,
+  latitude: call.latitude ?? null,
+  longitude: call.longitude ?? null
 });
 
 const normalizeAmbulance = (ambulance) => ({
@@ -30,11 +32,15 @@ const normalizeAmbulance = (ambulance) => ({
   vehicleNumber: ambulance.vehicleNumber ?? 'AMB-XXX',
   currentLocationNode: ambulance.currentLocationNode ?? 'Unknown node',
   status: ambulance.status ?? 'AVAILABLE',
-  equipment: normalizeEquipment(ambulance.equipment)
+  equipment: normalizeEquipment(ambulance.equipment),
+  crew: ambulance.crew ?? 'Standard Crew',
+  travelMinutes: Number(ambulance.travelMinutes ?? 0),
+  latitude: ambulance.latitude ?? null,
+  longitude: ambulance.longitude ?? null
 });
 
 // CandidateDto - the greedy scheduler's actual ranking for one call, computed
-// server-side from the real road-graph shortest path. Nothing here is guessed.
+// server-side from the real road-graph shortest path.
 const normalizeCandidate = (candidate) => ({
   ambulanceId: candidate.ambulanceId,
   vehicleNumber: candidate.vehicleNumber,
@@ -80,10 +86,8 @@ export async function fetchDispatchCandidates(callId) {
 }
 
 /**
- * POST /{id}/dispatch. The backend now replies with a DispatchResultDto
- * ({ dispatched, callId, ambulanceVehicleNumber, message }), not plain text -
- * callers must check `dispatched` themselves; a 200 response does not mean an
- * ambulance was actually assigned (it may just mean none was available).
+ * POST /{id}/dispatch. The backend replies with a DispatchResultDto
+ * ({ dispatched, callId, ambulanceVehicleNumber, message }), or JSON/text.
  */
 export async function allocateAmbulance(callId) {
   const url = `/api/v1/calls/${callId}/dispatch`;
@@ -100,17 +104,13 @@ export async function allocateAmbulance(callId) {
     throw new Error(payload?.message || `HTTP ${response.status}`);
   }
 
-<<<<<<< Updated upstream
   return {
-    dispatched: Boolean(payload?.dispatched),
+    dispatched: payload?.dispatched !== undefined ? Boolean(payload.dispatched) : true,
     callId: payload?.callId ?? callId,
     ambulanceVehicleNumber: payload?.ambulanceVehicleNumber ?? null,
     message: payload?.message
-      ?? (payload?.dispatched ? 'Dispatch completed.' : 'No suitable ambulance available at this time.')
+      ?? (payload?.dispatched === false ? 'No suitable ambulance available at this time.' : 'Dispatch completed.')
   };
-}
-=======
-  return text || 'Dispatch completed';
 }
 
 // Added endpoints for Dashboard context
@@ -141,4 +141,3 @@ export async function calculateRoute(origin, destination) {
     return null;
   }
 }
->>>>>>> Stashed changes

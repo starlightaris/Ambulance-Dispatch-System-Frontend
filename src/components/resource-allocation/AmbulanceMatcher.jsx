@@ -3,10 +3,6 @@ import React from 'react';
 const formatEquipment = (equipment = []) =>
   equipment.length === 0 ? 'None' : equipment.map((item) => item.replace(/_/g, ' ')).join(', ');
 
-<<<<<<< Updated upstream
-export default function AmbulanceMatcher({ emergency, matches, isLoading, error, onDispatch, isDispatching, summaryText }) {
-  if (!emergency) {
-=======
 const getStatusClass = (status) => {
   switch (status) {
     case 'AVAILABLE':
@@ -24,9 +20,14 @@ const getStatusClass = (status) => {
   }
 };
 
-export default function AmbulanceMatcher({ ambulances }) {
+export default function AmbulanceMatcher({
+  ambulances = [],
+  emergency,
+  matches = [],
+  isLoading,
+  error
+}) {
   if (!ambulances || ambulances.length === 0) {
->>>>>>> Stashed changes
     return (
       <div className="ra-panel ra-panel-empty">
         <h3 className="ra-panel-title">Fleet Status</h3>
@@ -35,55 +36,9 @@ export default function AmbulanceMatcher({ ambulances }) {
     );
   }
 
-<<<<<<< Updated upstream
-  const required = emergency.requiredEquipment || [];
+  const required = emergency?.requiredEquipment || [];
+  const bestMatch = matches.length > 0 ? matches[0] : null;
 
-  if (isLoading) {
-    return (
-      <div className="resource-panel">
-        <div className="panel-heading">
-          <h3>Ambulance match</h3>
-        </div>
-        <p>Asking the dispatch scheduler for the current ranking...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="resource-panel">
-        <div className="panel-heading">
-          <h3>Ambulance match</h3>
-        </div>
-        <div className="no-match-box">
-          <p>{error}</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!matches.length) {
-    return (
-      <div className="resource-panel">
-        <div className="panel-heading">
-          <h3>Ambulance match</h3>
-        </div>
-        <div className="no-match-box">
-          <p>No available ambulance covers all required equipment for this emergency.</p>
-          <ul>
-            {required.map((item) => (
-              <li key={item}>{item.replace(/_/g, ' ')}</li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    );
-  }
-
-  const bestMatch = matches[0];
-
-=======
->>>>>>> Stashed changes
   return (
     <div className="ra-panel ra-panel-filled flex-col">
       <div className="ra-panel-header">
@@ -138,70 +93,70 @@ export default function AmbulanceMatcher({ ambulances }) {
           );
         })}
       </div>
-<<<<<<< Updated upstream
 
-      {/*
-        These numbers (travelMinutes, extraEquipmentCount, score) come straight from
-        GET /api/v1/calls/{id}/candidates - the same greedy-scheduler + shortest-path
-        computation that POST /dispatch actually commits to. Nothing here is estimated
-        client-side.
-      */}
-      {matches.map((match, index) => (
-        <div key={match.ambulanceId} className={`match-card ${index === 0 ? 'winner' : ''}`}>
-          <div className="match-header-row">
-            <div>
-              <span className="match-badge">#{index + 1}</span>
-              <h4>{match.vehicleNumber}</h4>
+      {/* Match details when an emergency is selected */}
+      {emergency && (
+        <div className="ra-match-section" style={{ marginTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1rem' }}>
+          <h4 className="ra-card-title" style={{ marginBottom: '0.75rem' }}>
+            Dispatch Ranking for Call #{emergency.id}
+          </h4>
+
+          {isLoading && (
+            <p className="ra-panel-empty-text">Asking the dispatch scheduler for current ranking...</p>
+          )}
+
+          {error && (
+            <div className="ra-alert ra-alert-error" style={{ marginBottom: '0.5rem' }}>
+              <p>{error}</p>
             </div>
-            <div className="score-box">score {match.score.toFixed(1)}</div>
-          </div>
+          )}
 
-          <div className="match-grid">
-            <div>
-              <span className="mini-label">Current location</span>
-              <strong>{match.currentLocationNode}</strong>
+          {!isLoading && !error && matches.length === 0 && (
+            <div className="ra-alert ra-alert-warning">
+              <p>No available ambulance covers all required equipment for this emergency.</p>
+              {required.length > 0 && (
+                <p style={{ marginTop: '0.25rem', fontSize: '0.85rem' }}>
+                  Required: {formatEquipment(required)}
+                </p>
+              )}
             </div>
-            <div>
-              <span className="mini-label">Travel time</span>
-              <strong>{match.travelMinutes.toFixed(1)} min</strong>
+          )}
+
+          {!isLoading && !error && matches.map((match, index) => (
+            <div key={match.ambulanceId} className={`ra-fleet-card ${index === 0 ? 'ra-card-selected' : ''}`} style={{ marginBottom: '0.75rem' }}>
+              <div className="ra-card-header">
+                <div>
+                  <span className="ra-badge ra-badge-pending">#{index + 1}</span>
+                  <h4 className="ra-card-title" style={{ display: 'inline', marginLeft: '0.5rem' }}>{match.vehicleNumber}</h4>
+                </div>
+                <span className="ra-badge ra-badge-neutral">score {match.score.toFixed(1)}</span>
+              </div>
+
+              <div className="ra-card-grid" style={{ marginTop: '0.5rem' }}>
+                <div className="ra-meta-box">
+                  <span className="ra-meta-label">Location</span>
+                  <span className="ra-meta-value">{match.currentLocationNode}</span>
+                </div>
+                <div className="ra-meta-box">
+                  <span className="ra-meta-label">Travel ETA</span>
+                  <span className="ra-meta-value">{match.travelMinutes.toFixed(1)} min</span>
+                </div>
+              </div>
+
+              <div className="ra-card-equipment" style={{ marginTop: '0.5rem' }}>
+                <span className="ra-equipment-label">Ambulance Equipment</span>
+                <p className="ra-equipment-value">{formatEquipment(match.equipment)}</p>
+              </div>
             </div>
-            <div>
-              <span className="mini-label">Status</span>
-              <strong>{match.status}</strong>
+          ))}
+
+          {bestMatch && (
+            <div className="ra-alert ra-alert-success" style={{ marginTop: '0.5rem', fontSize: '0.85rem' }}>
+              <strong>Best dispatch decision:</strong> {bestMatch.vehicleNumber} covers every required clinical resource and has the lowest fitness score ({bestMatch.score.toFixed(1)}).
             </div>
-          </div>
-
-          <div className="coverage-block">
-            <span className="mini-label">Required equipment</span>
-            <p>{formatEquipment(required)}</p>
-          </div>
-
-          <div className="coverage-block">
-            <span className="mini-label">Ambulance equipment</span>
-            <p>{formatEquipment(match.equipment)}</p>
-          </div>
-
-          <div className="match-reason">
-            <span className="mini-label">Decision logic</span>
-            <p>
-              Covers every required piece of equipment ({formatEquipment(required)}) and carries{' '}
-              {match.extraEquipmentCount} extra resource(s). Real shortest-path travel time from{' '}
-              {match.currentLocationNode} to {emergency.locationNode} is {match.travelMinutes.toFixed(1)} minutes.
-            </p>
-          </div>
+          )}
         </div>
-      ))}
-
-      {bestMatch ? (
-        <div className="winning-callout">
-          <strong>Best dispatch decision:</strong> {bestMatch.vehicleNumber} is selected because it covers every
-          required clinical resource and has the lowest fitness score ({bestMatch.score.toFixed(1)}) for the
-          emergency at {emergency.locationNode}. This is the same ranking the backend will act on if dispatched now -
-          it can only change if the fleet changes in the meantime.
-        </div>
-      ) : null}
-=======
->>>>>>> Stashed changes
+      )}
     </div>
   );
 }
