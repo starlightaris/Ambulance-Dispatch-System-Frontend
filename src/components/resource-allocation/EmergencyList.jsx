@@ -40,7 +40,6 @@ export default function EmergencyList({ emergencies, selectedId, onSelect }) {
               </div>
 
               <h4>{patient.name || 'Unknown patient'}</h4>
-              <p className="emergency-condition">{patient.condition || emergency.condition}</p>
 
               <div className="emergency-meta">
                 <span>Location: {emergency.locationNode}</span>

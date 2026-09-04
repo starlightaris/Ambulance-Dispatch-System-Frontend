@@ -130,6 +130,12 @@
   color: var(--accent-danger);
 }
 
+.resource-alert.warning {
+  background: rgba(217, 119, 6, 0.08);
+  border-color: rgba(217, 119, 6, 0.25);
+  color: var(--accent-warning);
+}
+
 .resource-layout {
   display: grid;
   grid-template-columns: minmax(320px, 1.05fr) minmax(0, 1.95fr);

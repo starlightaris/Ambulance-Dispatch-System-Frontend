@@ -5,6 +5,7 @@ import ResourceCard from '../components/resource-allocation/ResourceCard.jsx';
 import {
   fetchPendingEmergencies,
   fetchAvailableAmbulances,
+  fetchDispatchCandidates,
   allocateAmbulance
 } from '../api/resourceAllocation.api.js';
 import '../styles/resource-allocation.css';
@@ -16,15 +17,19 @@ export default function ResourceAllocationPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [dispatchMessage, setDispatchMessage] = useState('');
+  const [dispatchOutcome, setDispatchOutcome] = useState(null); // 'success' | 'warning'
   const [isDispatching, setIsDispatching] = useState(false);
   const [dataSource, setDataSource] = useState('checking');
+  const [candidates, setCandidates] = useState([]);
+  const [candidatesLoading, setCandidatesLoading] = useState(false);
+  const [candidatesError, setCandidatesError] = useState('');
 
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
       setError('');
 
-     try {
+      try {
         const [pendingResult, availableResult] = await Promise.all([
           fetchPendingEmergencies(),
           fetchAvailableAmbulances()
@@ -64,31 +69,61 @@ export default function ResourceAllocationPage() {
     return emergencies.find((emergency) => emergency.id === selectedId) || emergencies[0];
   }, [emergencies, selectedId]);
 
-  const matchCandidates = useMemo(() => {
+  // The ranking itself - order, travel time, equipment penalty, score - comes
+  // straight from GET /{id}/candidates (GreedyScheduler's real computation).
+  // Nothing is re-scored or re-sorted here.
+  useEffect(() => {
+    if (!selectedEmergency) {
+      setCandidates([]);
+      return;
+    }
+
+    let cancelled = false;
+    setCandidatesLoading(true);
+    setCandidatesError('');
+
+    fetchDispatchCandidates(selectedEmergency.id)
+      .then((result) => {
+        if (!cancelled) {
+          setCandidates(result);
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setCandidates([]);
+          setCandidatesError(err.message || 'Could not load candidate ambulances.');
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setCandidatesLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedEmergency]);
+
+  // Fills in display-only details (location/status/equipment) for each ranked
+  // candidate from the already-fetched fleet list, by id - purely cosmetic,
+  // doesn't touch the ranking or the scores themselves.
+  const matches = useMemo(() => {
     if (!selectedEmergency) {
       return [];
     }
 
-    const required = selectedEmergency.requiredEquipment || [];
+    return candidates.map((candidate) => {
+      const ambulance = ambulances.find((amb) => amb.id === candidate.ambulanceId);
 
-    return ambulances
-      .filter((ambulance) => ambulance.status === 'AVAILABLE')
-      .filter((ambulance) => required.every((equipment) => ambulance.equipment.includes(equipment)))
-      .map((ambulance) => {
-        const extraEquipment = Math.max(ambulance.equipment.length - required.length, 0);
-        const travelMinutes = Number(ambulance.travelMinutes ?? 0);
-        const score = travelMinutes + extraEquipment * 5;
-
-        return {
-          ambulance,
-          required,
-          travelMinutes,
-          score,
-          reason: `Covers every required piece of equipment (${required.join(', ')}) and adds ${extraEquipment} extra resource(s). Travel from ${ambulance.currentLocationNode} to ${selectedEmergency.locationNode} is ${travelMinutes} minutes.`
-        };
-      })
-      .sort((left, right) => left.score - right.score);
-  }, [selectedEmergency, ambulances]);
+      return {
+        ...candidate,
+        currentLocationNode: ambulance?.currentLocationNode ?? 'Unknown node',
+        status: ambulance?.status ?? 'AVAILABLE',
+        equipment: ambulance?.equipment ?? []
+      };
+    });
+  }, [candidates, ambulances, selectedEmergency]);
 
   const handleDispatch = async () => {
     if (!selectedEmergency) {
@@ -97,28 +132,35 @@ export default function ResourceAllocationPage() {
 
     setIsDispatching(true);
     setDispatchMessage('');
+    setDispatchOutcome(null);
 
     try {
       const result = await allocateAmbulance(selectedEmergency.id);
-      setDispatchMessage(result);
-      const dispatchedVehicleNumber = result.match(/^Ambulance (.+) dispatched successfully\.$/)?.[1];
+      setDispatchMessage(result.message);
+      setDispatchOutcome(result.dispatched ? 'success' : 'warning');
 
-      setEmergencies((current) => current.filter((emergency) => emergency.id !== selectedEmergency.id));
-      if (dispatchedVehicleNumber) {
-        setAmbulances((current) =>
-          current.map((ambulance) =>
-            ambulance.vehicleNumber === dispatchedVehicleNumber
-              ? { ...ambulance, status: 'DISPATCHED' }
-              : ambulance
-          )
-        );
+      if (result.dispatched) {
+        setEmergencies((current) => current.filter((emergency) => emergency.id !== selectedEmergency.id));
+
+        if (result.ambulanceVehicleNumber) {
+          setAmbulances((current) =>
+            current.map((ambulance) =>
+              ambulance.vehicleNumber === result.ambulanceVehicleNumber
+                ? { ...ambulance, status: 'DISPATCHED' }
+                : ambulance
+            )
+          );
+        }
+
+        const remaining = emergencies.filter((emergency) => emergency.id !== selectedEmergency.id);
+        setSelectedId(remaining[0]?.id ?? null);
       }
-
-      const remaining = emergencies.filter((emergency) => emergency.id !== selectedEmergency.id);
-      setSelectedId(remaining[0]?.id ?? null);
+      // When nothing was dispatched, the call stays in the queue and the fleet
+      // is left untouched - a "no ambulance available" result is not a success.
     } catch (err) {
       console.error(err);
       setDispatchMessage(err.message || 'Dispatch failed.');
+      setDispatchOutcome('warning');
     } finally {
       setIsDispatching(false);
     }
@@ -148,7 +190,11 @@ export default function ResourceAllocationPage() {
       </div>
 
       {error ? <div className="resource-alert error">{error}</div> : null}
-      {dispatchMessage ? <div className="resource-alert success">{dispatchMessage}</div> : null}
+      {dispatchMessage ? (
+        <div className={`resource-alert ${dispatchOutcome === 'success' ? 'success' : 'warning'}`}>
+          {dispatchMessage}
+        </div>
+      ) : null}
 
       {loading ? (
         <div className="resource-panel loading-panel">
@@ -167,12 +213,14 @@ export default function ResourceAllocationPage() {
           <div className="resource-column resource-column-main">
             <AmbulanceMatcher
               emergency={selectedEmergency}
-              matches={matchCandidates}
+              matches={matches}
+              isLoading={candidatesLoading}
+              error={candidatesError}
               onDispatch={handleDispatch}
               isDispatching={isDispatching}
               summaryText={
-                matchCandidates[0]
-                  ? `Best fit: ${matchCandidates[0].ambulance.vehicleNumber} matches all equipment and reaches the incident in ${matchCandidates[0].travelMinutes} min.`
+                matches[0]
+                  ? `Best fit: ${matches[0].vehicleNumber} matches all equipment and reaches the incident in ${matches[0].travelMinutes.toFixed(1)} min (computed by the backend's greedy scheduler).`
                   : 'No ambulance currently satisfies all required equipment.'
               }
             />
