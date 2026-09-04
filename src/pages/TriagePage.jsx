@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { evaluateTriage, fetchActiveQueue, resolveAssessment } from '../api/triageApi.js';
+import { evaluateTriage, fetchActiveQueue, resolveAssessment } from '../api/triage.api.js';
 import TriageForm from '../components/triage/TriageForm.jsx';
 import TriageQueue from '../components/triage/TriageQueue.jsx';
 import TriageResult from '../components/triage/TriageResult.jsx';
