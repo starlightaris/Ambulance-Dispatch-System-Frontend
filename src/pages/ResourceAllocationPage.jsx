@@ -43,9 +43,11 @@ export default function ResourceAllocationPage() {
           setSelectedId(null);
         }
       } catch (err) {
-        console.error(err);
-        setError('Unable to load emergency queue or ambulance fleet from the backend.');
-        setDataSource('backend');
+        setEmergencies([]);
+        setAmbulances([]);
+        setSelectedId(null);
+        setError('Resource allocation backend is unavailable. Start the backend and check its database configuration.');
+        setDataSource('unavailable');
       } finally {
         setLoading(false);
       }
@@ -99,15 +101,18 @@ export default function ResourceAllocationPage() {
     try {
       const result = await allocateAmbulance(selectedEmergency.id);
       setDispatchMessage(result);
+      const dispatchedVehicleNumber = result.match(/^Ambulance (.+) dispatched successfully\.$/)?.[1];
 
       setEmergencies((current) => current.filter((emergency) => emergency.id !== selectedEmergency.id));
-      setAmbulances((current) =>
-        current.map((ambulance) =>
-          matchCandidates[0]?.ambulance?.id === ambulance.id
-            ? { ...ambulance, status: 'DISPATCHED' }
-            : ambulance
-        )
-      );
+      if (dispatchedVehicleNumber) {
+        setAmbulances((current) =>
+          current.map((ambulance) =>
+            ambulance.vehicleNumber === dispatchedVehicleNumber
+              ? { ...ambulance, status: 'DISPATCHED' }
+              : ambulance
+          )
+        );
+      }
 
       const remaining = emergencies.filter((emergency) => emergency.id !== selectedEmergency.id);
       setSelectedId(remaining[0]?.id ?? null);
@@ -131,7 +136,7 @@ export default function ResourceAllocationPage() {
         </div>
         <div className="resource-header-status">
           <span className={`status-chip ${dataSource === 'backend' ? 'live' : 'demo'}`}>
-            {dataSource === 'backend' ? 'Live backend' : dataSource === 'demo' ? 'Demo fallback' : 'Checking backend'}
+            {dataSource === 'backend' ? 'Live backend' : dataSource === 'demo' ? 'Demo fallback' : dataSource === 'unavailable' ? 'Backend unavailable' : 'Checking backend'}
           </span>
         </div>
       </div>
