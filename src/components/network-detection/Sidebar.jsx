@@ -24,11 +24,9 @@ export default function Sidebar({
   <div className="eyebrow">Live Dispatch Monitoring</div>
   <h1>Coverage Console</h1>
   <p>Real-time ambulance coverage across the city road network, powered by shortest-path analysis.</p>
-  <StatusBadge
-    connected={connected}
-    connectedLabel="live — connected to database"
-    disconnectedLabel="connecting to /api/v1/network …"
-  />
+  <StatusBadge tone={connected ? 'ok' : 'muted'}>
+    {connected ? 'live — connected to database' : 'connecting to /api/v1/network …'}
+  </StatusBadge>
       </div>
 
       <div className="section">
