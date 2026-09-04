@@ -11,7 +11,7 @@ export default function TriageQueue({ activeQueue, isLoading, isConnected, resol
   return (
     <section className="triage-queue" aria-busy={isLoading}>
       <div className="triage-queue-heading">
-        <div><span>02</span><h2>Active dispatch queue</h2><p>Highest clinical priority appears first.</p></div>
+        <div><span>02</span><h2>Active dispatch queue</h2><p>Ordered by a binary max-heap — MTS category severity, then priority score, then earliest arrival, each only breaking a tie in the one before it.</p></div>
         <div className="triage-queue-actions"><small className={isConnected ? 'is-live' : ''}>{isConnected ? '● Live · 15s refresh' : '● Updates paused'}</small><button type="button" onClick={onRefresh} disabled={isLoading}>{isLoading ? 'Refreshing…' : 'Refresh now'}</button></div>
       </div>
       <div className="triage-summary">

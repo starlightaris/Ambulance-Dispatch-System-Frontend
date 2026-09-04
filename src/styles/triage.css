@@ -72,7 +72,8 @@
 
 .triage-form,
 .triage-queue,
-.triage-result {
+.triage-result,
+.triage-why {
   background: #fff;
   border: 1px solid #dce5ef;
   border-radius: 14px;
@@ -156,6 +157,39 @@
 .triage-result strong { font-size: 1.1rem; }
 .triage-result-empty { display: grid; border-left-color: #99afc2; color: #587087; }
 
+.triage-why {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: .8rem;
+  padding: 1rem;
+  border-left: 5px solid var(--triage-category, #2f93c9);
+}
+.triage-why-block h3 { margin: 0 0 .3rem; font-family: "Space Grotesk", sans-serif; font-size: .92rem; color: #15283b; }
+.triage-why-hint { margin: 0 0 .55rem; color: #66788a; font-size: .76rem; }
+.triage-why-block ul { display: grid; gap: .35rem; margin: 0; padding: 0; list-style: none; }
+.triage-why-block > ul > li {
+  padding: .45rem .6rem;
+  color: #35495e;
+  font-size: .82rem;
+  background: #f9fbfd;
+  border: 1px solid #e3eaf1;
+  border-radius: 7px;
+}
+.triage-score-breakdown li {
+  display: flex;
+  justify-content: space-between;
+  gap: .6rem;
+  padding: .35rem .6rem;
+  font-size: .82rem;
+  border-bottom: 1px solid #eef2f6;
+}
+.triage-score-breakdown li:last-child { border-bottom: 0; }
+.triage-score-breakdown span { color: #66788a; }
+.triage-score-breakdown strong { color: #15283b; font-family: "JetBrains Mono", monospace; }
+.triage-score-total { margin-top: .2rem; padding-top: .5rem; border-top: 1px solid #dce5ef; font-weight: 800; }
+.triage-score-total strong { color: #176b95; }
+
 .triage-queue { min-width: 0; padding: 1.25rem; }
 .triage-queue-heading { align-items: flex-start; }
 .triage-queue-actions { gap: .55rem; }
@@ -195,7 +229,8 @@
   .triage-result { align-items: flex-start; flex-direction: column; }
   .triage-field-grid,
   .triage-toggle-grid,
-  .triage-summary { grid-template-columns: 1fr; }
+  .triage-summary,
+  .triage-why { grid-template-columns: 1fr; }
   .triage-counts { grid-template-columns: repeat(5, 1fr); }
   .triage-row { align-items: flex-start; flex-wrap: wrap; }
   .triage-row button { margin-left: 0; }
