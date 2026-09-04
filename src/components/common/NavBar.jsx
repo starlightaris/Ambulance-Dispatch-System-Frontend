@@ -5,7 +5,7 @@ const GROUPS = [
   {
     label: 'Live Dispatch',
     links: [
-      { to: '/', label: 'Network Detection', end: true },
+      { to: '/network-detection', label: 'Network Detection' },
       { to: '/routing', label: 'Routing' },
       { to: '/triage', label: 'Triage' },
     ],
@@ -19,11 +19,12 @@ const GROUPS = [
   },
 ];
 
-// Top-level nav shared by every module page.
+// Top-level nav shared by every module page. The brand doubles as the link
+// back to the dashboard (the "/" route) — the standard place a logo goes.
 export default function NavBar() {
   return (
     <nav className="top-nav">
-      <div className="top-nav-brand">Ambulance Dispatch</div>
+      <NavLink to="/" end className="top-nav-brand">Ambulance Dispatch</NavLink>
       {GROUPS.map((group) => (
         <div className="top-nav-group" key={group.label}>
           <span className="top-nav-group-label">{group.label}</span>
@@ -32,7 +33,6 @@ export default function NavBar() {
               <NavLink
                 key={link.to}
                 to={link.to}
-                end={link.end}
                 className={({ isActive }) => `top-nav-link${isActive ? ' active' : ''}`}
               >
                 {link.label}
