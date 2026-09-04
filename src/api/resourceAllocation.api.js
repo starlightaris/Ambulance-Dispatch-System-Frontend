@@ -9,43 +9,38 @@ const normalizeEquipment = (equipment) => {
     .filter((item, index, arr) => arr.indexOf(item) === index);
 };
 
-const inferEquipmentFromCategory = (category) => {
-  const normalized = String(category || '').toUpperCase();
-
-  if (normalized.includes('RED') || normalized.includes('CRITICAL')) {
-    return ['DEFIBRILLATOR', 'OXYGEN_SUPPLY', 'ICU_EQUIPMENT'];
-  }
-
-  if (normalized.includes('YELLOW') || normalized.includes('HIGH')) {
-    return ['ECG_MONITOR', 'OXYGEN_SUPPLY'];
-  }
-
-  return ['ECG_MONITOR'];
-};
-
+// Field names below mirror CallDto / AmbulanceDto / CandidateDto exactly
+// (src/main/java/.../resource_allocation/dto on the backend) - no guessed
+// alternate field names, since there's only one real shape to expect now.
 const normalizeEmergency = (call) => ({
-  id: call.id ?? call.callId ?? call.uuid ?? Date.now(),
-  patient: call.patient ?? {
+  id: call.id,
+  patient: {
     name: call.patientName ?? 'Unknown patient',
-    condition: call.condition ?? 'Emergency condition',
-    urgencyLevel: call.urgencyLevel ?? call.category ?? 'HIGH'
+    urgencyLevel: call.urgencyLevel ?? null
   },
-  condition: call.condition ?? call.patient?.condition ?? 'Emergency condition',
-  locationNode: call.locationNode ?? call.location ?? 'Node_Unknown',
+  locationNode: call.locationNode ?? 'Node_Unknown',
   status: call.status ?? 'RECEIVED',
-  requiredEquipment: normalizeEquipment(
-    call.requiredEquipment ?? call.patient?.requiredEquipment ?? inferEquipmentFromCategory(call.category ?? call.urgencyLevel)
-  ),
-  receivedAt: call.receivedAt ?? new Date().toISOString()
+  requiredEquipment: normalizeEquipment(call.requiredEquipment),
+  receivedAt: call.receivedAt ?? null,
+  assignedAmbulanceVehicleNumber: call.assignedAmbulanceVehicleNumber ?? null
 });
 
 const normalizeAmbulance = (ambulance) => ({
-  id: ambulance.id ?? ambulance.ambulanceId,
-  vehicleNumber: ambulance.vehicleNumber ?? ambulance.registrationNumber ?? 'AMB-XXX',
-  currentLocationNode: ambulance.currentLocationNode ?? ambulance.locationNode ?? 'Unknown node',
+  id: ambulance.id,
+  vehicleNumber: ambulance.vehicleNumber ?? 'AMB-XXX',
+  currentLocationNode: ambulance.currentLocationNode ?? 'Unknown node',
   status: ambulance.status ?? 'AVAILABLE',
-  equipment: normalizeEquipment(ambulance.equipment ?? []),
-  travelMinutes: Number(ambulance.travelMinutes ?? ambulance.distanceMinutes ?? ambulance.score ?? 0)
+  equipment: normalizeEquipment(ambulance.equipment)
+});
+
+// CandidateDto - the greedy scheduler's actual ranking for one call, computed
+// server-side from the real road-graph shortest path. Nothing here is guessed.
+const normalizeCandidate = (candidate) => ({
+  ambulanceId: candidate.ambulanceId,
+  vehicleNumber: candidate.vehicleNumber,
+  travelMinutes: Number(candidate.travelMinutes ?? 0),
+  extraEquipmentCount: Number(candidate.extraEquipmentCount ?? 0),
+  score: Number(candidate.score ?? 0)
 });
 
 async function safeFetchJson(url) {
@@ -57,15 +52,13 @@ async function safeFetchJson(url) {
   return res.json();
 }
 
-// Updated URL and return format
 export async function fetchPendingEmergencies() {
   const payload = await safeFetchJson('/api/v1/calls/pending');
   const list = Array.isArray(payload) ? payload : [payload].filter(Boolean);
-  
+
   return list.map(normalizeEmergency);
 }
 
-// Updated URL and return format
 export async function fetchAvailableAmbulances() {
   const payload = await safeFetchJson('/api/v1/calls/ambulances');
   const list = Array.isArray(payload) ? payload : [payload].filter(Boolean);
@@ -75,7 +68,23 @@ export async function fetchAvailableAmbulances() {
     .filter((ambulance) => ambulance.status === 'AVAILABLE');
 }
 
-// Updated URL to match /{id}/dispatch
+/**
+ * Read-only preview of GreedyScheduler's ranking for a call - GET /{id}/candidates.
+ * Dispatches nothing; safe to call whenever the selected emergency changes.
+ */
+export async function fetchDispatchCandidates(callId) {
+  const payload = await safeFetchJson(`/api/v1/calls/${callId}/candidates`);
+  const list = Array.isArray(payload) ? payload : [];
+
+  return list.map(normalizeCandidate);
+}
+
+/**
+ * POST /{id}/dispatch. The backend now replies with a DispatchResultDto
+ * ({ dispatched, callId, ambulanceVehicleNumber, message }), not plain text -
+ * callers must check `dispatched` themselves; a 200 response does not mean an
+ * ambulance was actually assigned (it may just mean none was available).
+ */
 export async function allocateAmbulance(callId) {
   const url = `/api/v1/calls/${callId}/dispatch`;
   const response = await fetch(url, {
@@ -85,10 +94,17 @@ export async function allocateAmbulance(callId) {
     }
   });
 
-  const text = await response.text();
+  const payload = await response.json().catch(() => null);
+
   if (!response.ok) {
-    throw new Error(text || `HTTP ${response.status}`);
+    throw new Error(payload?.message || `HTTP ${response.status}`);
   }
 
-  return text || 'Dispatch completed';
+  return {
+    dispatched: Boolean(payload?.dispatched),
+    callId: payload?.callId ?? callId,
+    ambulanceVehicleNumber: payload?.ambulanceVehicleNumber ?? null,
+    message: payload?.message
+      ?? (payload?.dispatched ? 'Dispatch completed.' : 'No suitable ambulance available at this time.')
+  };
 }
